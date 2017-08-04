@@ -16,7 +16,11 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * Bae et al.: Process mining, discovery, and integration using distance
  * measures.
  * 
- * @author Michael Becker
+ * @author Alex Meincheim 
+ * 
+ * Implementation based on Michael Becker.
+ * 
+ * Customized for ProM 6 and Petri net models
  * 
  */
 public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasure

@@ -22,7 +22,11 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * TODO: allow for comparison based on connector types, too
  * 
- * @author Michael Becker
+ * @author Alex Meincheim 
+ * 
+ * Implementation based on Michael Becker.
+ * 
+ * Customized for ProM 6 and Petri net models
  */
 public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetGraph> {

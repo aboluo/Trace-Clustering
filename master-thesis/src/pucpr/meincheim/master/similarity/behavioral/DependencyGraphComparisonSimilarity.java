@@ -41,9 +41,11 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * In our implementation, we can handle EPC models with cycles
  * 
- * @author Alex Meincheim - Implementation based on Michael Becker
+ * @author Alex Meincheim 
  * 
- *         Ajusted for ProM 6 and Petrinet models
+ * Implementation based on Michael Becker.
+ * 
+ * Customized for ProM 6 and Petri net models
  */
 public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetGraph> {
