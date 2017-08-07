@@ -17,14 +17,15 @@ import org.processmining.plugins.petrinet.replayer.PNLogReplayer;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayAlgorithm;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParamProvider;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParameter;
-import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppPruneAlg;
+import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParam;
+import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParamProvider;
+import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppStubbornAlg;
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
+import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGen;
+import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGenRes;
 
 import be.kuleuven.econ.cbf.input.Mapping;
 import be.kuleuven.econ.cbf.input.MemoryMapping;
-import be.kuleuven.econ.cbf.metrics.generalization.NegativeEventGeneralizationMetric;
-import be.kuleuven.econ.cbf.metrics.precision.AdvancedBehaviouralAppropriateness;
-import be.kuleuven.econ.cbf.metrics.recall.RozinatFitness;
 import be.kuleuven.econ.cbf.metrics.simplicity.AdvancedStructuralAppropriateness;
 import be.kuleuven.econ.cbf.utils.MappingUtils;
 import nl.tue.astar.AStarException;
@@ -36,35 +37,17 @@ public class QualityEvaluator {
 	private TransEvClassMapping transMapping;
 	private UIPluginContext context;
 
-	private static RozinatFitness recall = new RozinatFitness();
-	private static AdvancedBehaviouralAppropriateness precision = new AdvancedBehaviouralAppropriateness();
 	private static AdvancedStructuralAppropriateness simplicity = new AdvancedStructuralAppropriateness();
-	private static NegativeEventGeneralizationMetric generalization = new NegativeEventGeneralizationMetric();
 
 	public QualityEvaluator(UIPluginContext context, XLog log, Petrinet net) {
 		this.mapping = new MemoryMapping(log, net);
 		this.transMapping = MappingUtils.getTransEvClassMapping(mapping, net, log);
 		this.context = context;
-		
-		if(!PetriNetUtils.hasInitialMarkings(context, mapping.getPetrinet())){
+
+		if (!PetriNetUtils.hasInitialMarkings(context, mapping.getPetrinet())) {
 			PetriNetUtils.addInitialMarking(context, mapping.getPetrinet(), getInitialMarking(mapping.getPetrinet()));
 		}
-		
-	}
 
-	private Marking getInitialMarking(Petrinet net) {
-		Set<Place> places = PetrinetUtils.getStartPlaces(net);
-		if (places.isEmpty()) {
-			for (Place vertexA : net.getPlaces()) {
-				if (vertexA.getLabel().startsWith("source")) {
-					places.add(vertexA);
-				}
-			}
-		}
-
-		Marking initialMarking = new Marking();
-		initialMarking.addAll(places);
-		return initialMarking;
 	}
 
 	public double calculateRecall() {
@@ -91,17 +74,18 @@ public class QualityEvaluator {
 			fitnessResult = fitnessResult.replace(',', '.');
 		}
 
-		System.out.println("Recall: " + fitnessResult);	
-		
+		System.out.println("Recall: " + fitnessResult);
+
 		return Double.parseDouble(fitnessResult);
 	}
 
-	public double calculatePrecision() {
-		IPNReplayAlgorithm alg = new BehavAppPruneAlg();
-		IPNReplayParamProvider provider = alg.constructParamProvider(context, mapping.getPetrinet(), mapping.getLog(),
+	public AlignmentPrecGenRes calculateAlignmentPrecGenRes() {
+		IPNReplayAlgorithm alg = new BehavAppStubbornAlg();
+		IPNReplayParamProvider provider = new BehavAppParamProvider(context, mapping.getPetrinet(), mapping.getLog(),
 				transMapping);
 		JComponent paramUI = provider.constructUI();
-		IPNReplayParameter parameters = provider.constructReplayParameter(paramUI);
+		BehavAppParam parameters = (BehavAppParam) provider.constructReplayParameter(paramUI);
+		parameters.setMaxNumStates(5000);
 		parameters.setCreateConn(false);
 		parameters.setGUIMode(false);
 		PNLogReplayer rep = new PNLogReplayer();
@@ -112,21 +96,10 @@ public class QualityEvaluator {
 		} catch (AStarException e) {
 
 		}
-
-		return result != null ? (double) result.getInfo().get(PNRepResult.BEHAVIORAPPROPRIATENESS) : 0;
+		AlignmentPrecGen aPrecGen = new AlignmentPrecGen();
+		return aPrecGen.measureConformanceAssumingCorrectAlignment(context, transMapping, result, mapping.getPetrinet(),
+				getInitialMarking(mapping.getPetrinet()), false);
 	}
-
-	// public double calculateRecall() {
-	// recall.load(mapping);
-	// recall.calculate();
-	// return recall.getResult();
-	// }
-
-	// public double calculatePrecision() {
-	// precision.load(mapping);
-	// precision.calculate();
-	// return precision.getResult();
-	// }
 
 	public double calculateSimplicity() {
 		simplicity.load(mapping);
@@ -134,20 +107,28 @@ public class QualityEvaluator {
 		return simplicity.getResult();
 	}
 
-	public double calculateGeneralization() {
-		generalization.load(mapping);
-		generalization.calculate();
-		return generalization.getResult();
-	}
-
 	public ModelQuality calculate() {
-		ModelQuality q = new ModelQuality();
+		ModelQuality q = new ModelQuality();		
+		AlignmentPrecGenRes res = calculateAlignmentPrecGenRes();		
 		q.setModelName(modelName);
 		q.setRecall(calculateRecall());
-		//q.setPrecision(calculatePrecision());
-		//q.setSimplicit(calculateSimplicity());
-		//q.setGeneralization(calculateGeneralization());
-
+		q.setPrecision(res.getPrecision());
+		q.setGeneralization(res.getGeneralization());
+		// q.setSimplicit(calculateSimplicity());
 		return q;
+	}
+
+	private Marking getInitialMarking(Petrinet net) {
+		Set<Place> places = PetrinetUtils.getStartPlaces(net);
+		if (places.isEmpty()) {
+			for (Place vertexA : net.getPlaces()) {
+				if (vertexA.getLabel().startsWith("source")) {
+					places.add(vertexA);
+				}
+			}
+		}
+		Marking initialMarking = new Marking();
+		initialMarking.addAll(places);
+		return initialMarking;
 	}
 }

@@ -20,6 +20,7 @@ import org.processmining.plugins.petrinet.replayer.PNLogReplayer;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayAlgorithm;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParamProvider;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParameter;
+import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParam;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParamProvider;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppStubbornAlg;
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
@@ -86,20 +87,20 @@ public class QualityEvaluatorTest extends BaseTest {
 		IPNReplayParamProvider provider = new BehavAppParamProvider(context, model, log,
 				trasnEv);
 		JComponent paramUI = provider.constructUI();
-		IPNReplayParameter parameters = provider.constructReplayParameter(paramUI);
-		parameters.setCreateConn(false);
+		BehavAppParam parameters = (BehavAppParam)provider.constructReplayParameter(paramUI);		
+		parameters.setMaxNumStates(200000);
 		parameters.setGUIMode(false);
 		parameters.setInitialMarking(getInitialMarking(model));
 		PNLogReplayer rep = new PNLogReplayer();
 		PNRepResult result = null;
 		
-	
-
 		try {
 			result = rep.replayLog(context, mapping.getPetrinet(), mapping.getLog(), trasnEv, alg, parameters);
 		} catch (AStarException e) {
 
 		}
+		
+		System.out.println("Behavioral app " + result.getInfo().get(PNRepResult.BEHAVIORAPPROPRIATENESS));
 		
 		AlignmentPrecGen aPrecGen = new AlignmentPrecGen();
 		AlignmentPrecGenRes aresult =  aPrecGen.measureConformanceAssumingCorrectAlignment(
