@@ -8,6 +8,7 @@ import javax.xml.transform.TransformerException;
 
 import org.deckfour.xes.model.XLog;
 import org.junit.Test;
+import org.processmining.contexts.uitopia.UIContext;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
@@ -16,13 +17,14 @@ import org.processmining.petrinets.utils.PetriNetUtils;
 import org.processmining.plugins.astar.petrinet.PetrinetReplayerWithILP;
 import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMapping;
 import org.processmining.plugins.kutoolbox.utils.PetrinetUtils;
+import org.processmining.plugins.petrinet.PetriNetVisualization;
 import org.processmining.plugins.petrinet.replayer.PNLogReplayer;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayAlgorithm;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParamProvider;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParameter;
+import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppNaiveAlg;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParam;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParamProvider;
-import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppStubbornAlg;
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGen;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGenRes;
@@ -32,10 +34,11 @@ import be.kuleuven.econ.cbf.input.MemoryMapping;
 import be.kuleuven.econ.cbf.utils.MappingUtils;
 import nl.tue.astar.AStarException;
 import pucpr.meincheim.master.base.BaseTest;
+import pucpr.meincheim.master.util.JComponentVisualizationUtils;
 
 public class QualityEvaluatorTest extends BaseTest {
 
-	//@Test
+	// @Test
 	public void qualityModelTest()
 			throws IOException, TransformerException, ConnectionCannotBeObtained, AStarException {
 		QualityEvaluator qe = new QualityEvaluator(context, logmodel1, model1);
@@ -63,50 +66,48 @@ public class QualityEvaluatorTest extends BaseTest {
 
 	@Test
 	public void test() throws ConnectionCannotBeObtained, AStarException {
-		replayCalc(hospitalLog, hospitalmodelCluster0, new PNLogReplayer(), new PetrinetReplayerWithILP());		
+		replayCalc(hospitalLog, hospitalmodelCluster0, new PNLogReplayer(), new PetrinetReplayerWithILP());
 		precCalc(hospitalLog, hospitalmodelCluster0);
 	}
-	
-	//@Test
-	public void test1() throws ConnectionCannotBeObtained, AStarException {		
-		replayCalc(logmodel0, model0, new PNLogReplayer(), new PetrinetReplayerWithILP());		
+
+	// @Test
+	public void test1() throws ConnectionCannotBeObtained, AStarException {
+		replayCalc(logmodel0, model0, new PNLogReplayer(), new PetrinetReplayerWithILP());
 		precCalc(logmodel0, model0);
 	}
-	
-	private void precCalc(XLog log, Petrinet model)
-			throws AStarException, ConnectionCannotBeObtained {
+
+	private void precCalc(XLog log, Petrinet model) throws AStarException, ConnectionCannotBeObtained {
 		Mapping mapping = new MemoryMapping(log, model);
-		TransEvClassMapping trasnEv = MappingUtils.getTransEvClassMapping(mapping, model, log);
 		MappingUtils.setInvisiblesInPetrinet(mapping, model);
-		
-		if(!PetriNetUtils.hasInitialMarkings(context, model)){
-			PetriNetUtils.addInitialMarking(context, model, getInitialMarking(model));
-		}
-		
-		IPNReplayAlgorithm alg = new BehavAppStubbornAlg();
-		IPNReplayParamProvider provider = new BehavAppParamProvider(context, model, log,
-				trasnEv);
+		TransEvClassMapping trasnEv = MappingUtils.getTransEvClassMapping(mapping, model, log);
+
+		IPNReplayAlgorithm alg = new BehavAppNaiveAlg();
+		IPNReplayParamProvider provider = alg.constructParamProvider(context, model, log, trasnEv);
 		JComponent paramUI = provider.constructUI();
-		BehavAppParam parameters = (BehavAppParam)provider.constructReplayParameter(paramUI);		
-		parameters.setMaxNumStates(200000);
+		BehavAppParam parameters = (BehavAppParam) provider.constructReplayParameter(paramUI);
 		parameters.setGUIMode(false);
-		parameters.setInitialMarking(getInitialMarking(model));
+
+		Marking finalMarking = PetrinetUtils.getFinalMarking(model);
+
+		if (finalMarking != null) {
+			parameters.setFinalMarkings(new Marking[] { finalMarking });
+		}
+
+		if (!PetriNetUtils.hasInitialMarkings(context, model)) {
+			PetriNetUtils.addInitialMarking(context, model, getInitialMarking(model));
+			parameters.setInitialMarking(getInitialMarking(model));
+		}
+
 		PNLogReplayer rep = new PNLogReplayer();
 		PNRepResult result = null;
-		
-		try {
-			result = rep.replayLog(context, mapping.getPetrinet(), mapping.getLog(), trasnEv, alg, parameters);
-		} catch (AStarException e) {
+		result = rep.replayLog(context, mapping.getPetrinet(), mapping.getLog(), trasnEv, alg, parameters);
 
-		}
-		
 		System.out.println("Behavioral app " + result.getInfo().get(PNRepResult.BEHAVIORAPPROPRIATENESS));
-		
+
 		AlignmentPrecGen aPrecGen = new AlignmentPrecGen();
-		AlignmentPrecGenRes aresult =  aPrecGen.measureConformanceAssumingCorrectAlignment(
-				context, trasnEv, result, model, getInitialMarking(model),
-				false);
-				
+		AlignmentPrecGenRes aresult = aPrecGen.measureConformanceAssumingCorrectAlignment(context, trasnEv, result,
+				model, getInitialMarking(model), false);
+
 		double precision = aresult.getPrecision();
 		double generalization = aresult.getGeneralization();
 
@@ -117,20 +118,25 @@ public class QualityEvaluatorTest extends BaseTest {
 	private void replayCalc(XLog log, Petrinet model, PNLogReplayer rep, IPNReplayAlgorithm alg)
 			throws AStarException, ConnectionCannotBeObtained {
 		Mapping mapping = new MemoryMapping(log, model);
-		TransEvClassMapping trasnEv = MappingUtils.getTransEvClassMapping(mapping, model, log);
-
 		MappingUtils.setInvisiblesInPetrinet(mapping, model);
-				
-		if(!PetriNetUtils.hasInitialMarkings(context, model)){
-			PetriNetUtils.addInitialMarking(context, model, getInitialMarking(model));
-		}
-		
+		TransEvClassMapping trasnEv = MappingUtils.getTransEvClassMapping(mapping, model, log);
 		IPNReplayParamProvider provider = alg.constructParamProvider(context, model, log, trasnEv);
 		JComponent paramUI = provider.constructUI();
 		IPNReplayParameter parameters = provider.constructReplayParameter(paramUI);
 		parameters.setCreateConn(false);
 		parameters.setGUIMode(false);
-		//parameters.setInitialMarking(getInitialMarking(model));
+
+		Marking finalMarking = PetrinetUtils.getFinalMarking(model);
+
+		if (finalMarking != null) {
+			parameters.setFinalMarkings(new Marking[] { finalMarking });
+		}
+
+		if (!PetriNetUtils.hasInitialMarkings(context, model)) {
+			PetriNetUtils.addInitialMarking(context, model, getInitialMarking(model));
+			parameters.setInitialMarking(getInitialMarking(model));
+		}
+
 		PNRepResult result = rep.replayLog(context, model, log, trasnEv, alg, parameters);
 		System.out.println("Fitness: " + result.getInfo().get(result.TRACEFITNESS));
 

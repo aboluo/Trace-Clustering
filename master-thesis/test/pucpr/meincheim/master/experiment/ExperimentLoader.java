@@ -54,9 +54,8 @@ public class ExperimentLoader {
 		laRosaSimilarity = new LaRosaSimilarity();
 		dependencyGraphComparisonSimilarity = new DependencyGraphComparisonSimilarity();
 
-		// filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática -
-		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
-		filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		//filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 
 		validationDatesetPathBase = filePathBase + "\\Dataset\\SimilarityValidation\\";
 		experimentPathBase = filePathBase + "\\Experiment";
@@ -68,19 +67,19 @@ public class ExperimentLoader {
 	@Test
 	public void SemanticSimilarityHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "SemanticSimilarityHospitalLog";
-		process(semanticSimilarity, hospitalLog, folderExporter, true, true);
+		process(semanticSimilarity, hospitalLog, folderExporter, false, true);
 	}
 
 	@Test
 	public void DependencyGraphSimilarityHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "DependencyGraphSimilaritySimilarityHospitalLog";
-		process(dependencyGraphComparisonSimilarity, hospitalLog, folderExporter, true, true);
+		process(dependencyGraphComparisonSimilarity, hospitalLog, folderExporter, false, true);
 	}
 
 	@Test
 	public void LaRosaHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "LaRosaHospitalLog";
-		process(laRosaSimilarity, hospitalLog, folderExporter, true, true);
+		process(laRosaSimilarity, hospitalLog, folderExporter, false, true);
 	}
 
 	private void process(SimilarityMeasure sim, XLog log, String folderExporter, boolean cluster, boolean evaluate)
@@ -104,8 +103,7 @@ public class ExperimentLoader {
 			XLog log = LogUtils.loadByFile(new File(logPath));
 			Petrinet model = miner.mineToPetrinet(context, log);
 			QualityEvaluator qe = new QualityEvaluator(context, log, model);
-			qualities.add(qe.calculate());
-			System.gc();
+			qualities.add(qe.calculate());			
 		}
 		return qualities;
 	}
