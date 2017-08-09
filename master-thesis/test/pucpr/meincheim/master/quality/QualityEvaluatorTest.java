@@ -6,14 +6,20 @@ import java.util.Set;
 import javax.swing.JComponent;
 import javax.xml.transform.TransformerException;
 
+import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.XLog;
 import org.junit.Test;
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
+import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetFactory;
 import org.processmining.contexts.uitopia.UIContext;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
+import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
+import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.petrinets.utils.PetriNetUtils;
+import org.processmining.plugins.InductiveMiner.efficienttree.EfficientTree;
 import org.processmining.plugins.astar.petrinet.PetrinetReplayerWithILP;
 import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMapping;
 import org.processmining.plugins.kutoolbox.utils.PetrinetUtils;
@@ -28,12 +34,23 @@ import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppP
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGen;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGenRes;
+import org.processmining.processtree.ProcessTree;
+import org.processmining.projectedrecallandprecision.framework.CompareParameters;
+import org.processmining.projectedrecallandprecision.framework.CompareParameters.RecallName;
+import org.processmining.projectedrecallandprecision.helperclasses.AutomatonFailedException;
+import org.processmining.projectedrecallandprecision.plugins.CompareLog2PetriNetPluginScaledLogPrecision;
+import org.processmining.projectedrecallandprecision.plugins.CompareLog2ProcessTreePluginScaledLogPrecision;
+import org.processmining.projectedrecallandprecision.plugins.CompareParametersDialog;
+import org.processmining.projectedrecallandprecision.result.ProjectedRecallPrecisionResult;
+import org.processmining.projectedrecallandprecision.result.ProjectedRecallPrecisionResult.ProjectedMeasuresFailedException;
 
 import be.kuleuven.econ.cbf.input.Mapping;
 import be.kuleuven.econ.cbf.input.MemoryMapping;
 import be.kuleuven.econ.cbf.utils.MappingUtils;
+import gnu.trove.set.hash.THashSet;
 import nl.tue.astar.AStarException;
 import pucpr.meincheim.master.base.BaseTest;
+import pucpr.meincheim.master.miner.InductiveMiner;
 import pucpr.meincheim.master.util.JComponentVisualizationUtils;
 
 public class QualityEvaluatorTest extends BaseTest {
@@ -41,39 +58,83 @@ public class QualityEvaluatorTest extends BaseTest {
 	// @Test
 	public void qualityModelTest()
 			throws IOException, TransformerException, ConnectionCannotBeObtained, AStarException {
-		QualityEvaluator qe = new QualityEvaluator(context, logmodel1, model1);
+		AyraQualityEvaluator qe = new AyraQualityEvaluator(context, logmodel1, model1);
 
 		ModelQuality modelQuality = qe.calculate();
 		System.out.println("Recall " + modelQuality.getRecall());
 		System.out.println("Precision " + modelQuality.getPrecision());
 
-		qe = new QualityEvaluator(context, logmodel0, model0);
+		qe = new AyraQualityEvaluator(context, logmodel0, model0);
 		modelQuality = qe.calculate();
 		System.out.println("Recall " + modelQuality.getRecall());
 		System.out.println("Precision " + modelQuality.getPrecision());
 
-		qe = new QualityEvaluator(context, logmodel2, model2);
+		qe = new AyraQualityEvaluator(context, logmodel2, model2);
 		modelQuality = qe.calculate();
 		System.out.println("Recall " + modelQuality.getRecall());
 		System.out.println("Precision " + modelQuality.getPrecision());
 
-		qe = new QualityEvaluator(context, hospitalLogCluster0, hospitalmodelCluster0);
+		qe = new AyraQualityEvaluator(context, hospitalLogCluster0, hospitalmodelCluster0);
 		modelQuality = qe.calculate();
 		System.out.println("Recall " + modelQuality.getRecall());
 		System.out.println("Precision " + modelQuality.getPrecision());
 
 	}
 
-	@Test
+	// @Test
 	public void test() throws ConnectionCannotBeObtained, AStarException {
-		replayCalc(hospitalLog, hospitalmodelCluster0, new PNLogReplayer(), new PetrinetReplayerWithILP());
-		precCalc(hospitalLog, hospitalmodelCluster0);
+		replayCalc(hospitalLogCluster0, hospitalmodelCluster0, new PNLogReplayer(), new PetrinetReplayerWithILP());
+		precCalc(hospitalLogCluster0, hospitalmodelCluster0);
 	}
 
 	// @Test
 	public void test1() throws ConnectionCannotBeObtained, AStarException {
 		replayCalc(logmodel0, model0, new PNLogReplayer(), new PetrinetReplayerWithILP());
 		precCalc(logmodel0, model0);
+	}
+
+	@Test
+	public void test2() throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {
+		pccCals(hospitalLogCluster0, hospitalmodelCluster0);
+	}
+
+	@Test
+	public void testProcessTree()
+			throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {
+
+		InductiveMiner miner = new InductiveMiner();
+		ProcessTree tModel = miner.mineToProcessTree(context, hospitalLogCluster0);
+		CompareLog2ProcessTreePluginScaledLogPrecision calc = new CompareLog2ProcessTreePluginScaledLogPrecision();
+		int num = new EfficientTree(tModel).getInt2activity().length;
+
+		CompareParametersDialog dialog = new CompareParametersDialog(hospitalLogCluster0, num, RecallName.fitness);
+		CompareParameters parameters = dialog.getMiningParameters();
+		parameters.setK(2);
+		ProjectedRecallPrecisionResult result = calc.measure(hospitalLogCluster0, tModel, parameters,
+				ProMCanceller.NEVER_CANCEL);
+		System.out.println("Precision " + result.getPrecision());
+		System.out.println("Fitness " + result.getRecall());
+	}
+
+	private void pccCals(XLog log, Petrinet model)
+			throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {
+		AcceptingPetriNet aModel = AcceptingPetriNetFactory.createAcceptingPetriNet(model, getInitialMarking(model),
+				PetrinetUtils.getFinalMarking(model));
+		CompareLog2PetriNetPluginScaledLogPrecision calc = new CompareLog2PetriNetPluginScaledLogPrecision();
+
+		Set<String> labels = new THashSet<>();
+		for (Transition t : aModel.getNet().getTransitions()) {
+			if (!t.isInvisible()) {
+				labels.add(t.getLabel());
+			}
+		}
+		CompareParametersDialog dialog = new CompareParametersDialog(log, labels.size(), RecallName.fitness);
+		CompareParameters parameters = dialog.getMiningParameters();
+		parameters.setK(1);
+		ProjectedRecallPrecisionResult result = calc.measure(log, aModel, parameters, ProMCanceller.NEVER_CANCEL);
+		System.out.println("Precision " + result.getPrecision());
+		System.out.println("Fitness " + result.getRecall());
+
 	}
 
 	private void precCalc(XLog log, Petrinet model) throws AStarException, ConnectionCannotBeObtained {

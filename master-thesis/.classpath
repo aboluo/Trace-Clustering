@@ -38,7 +38,6 @@
 	<classpathentry kind="lib" path="src/br/meincheim/lib/freehep-io-2.0.2.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/freehep-util-2.0.2.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/freehep-xml-2.1.1.jar"/>
-	<classpathentry kind="lib" path="src/br/meincheim/lib/AcceptingPetriNet.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/DivideAndConquer.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/EfficientStorage.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/EvolutionaryTreeMiner.jar"/>
@@ -70,5 +69,8 @@
 	<classpathentry kind="lib" path="src/br/meincheim/lib/jbpt-0.2.429.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/PetriNets.jar"/>
 	<classpathentry kind="lib" path="src/br/meincheim/lib/PNetReplayer.jar"/>
+	<classpathentry kind="lib" path="src/br/meincheim/lib/ProjectedRecallAndPrecision.jar"/>
+	<classpathentry kind="lib" path="src/br/meincheim/lib/AcceptingPetriNet.jar"/>
+	<classpathentry kind="lib" path="src/br/meincheim/lib/commons-collections4-4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

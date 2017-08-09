@@ -3,7 +3,7 @@ package pucpr.meincheim.master.cluster;
 import java.io.IOException;
 import java.util.List;
 
-import pucpr.meincheim.master.quality.QualityEvaluator;
+import pucpr.meincheim.master.quality.AyraQualityEvaluator;
 
 public class Metric {
 

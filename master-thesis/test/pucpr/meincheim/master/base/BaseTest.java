@@ -31,8 +31,8 @@ public abstract class BaseTest extends AbstractModelGraphSimilarityMeasure{
 	protected Petrinet model0;
 	protected Petrinet model1;
 	protected Petrinet model2;
+	protected Petrinet hospitalmodel;
 	protected Petrinet hospitalmodelCluster0;
-	
 	protected Petrinet complexModel;
 
 	@Before
@@ -65,7 +65,7 @@ public abstract class BaseTest extends AbstractModelGraphSimilarityMeasure{
 		
 		file = new File(filePathBase + "Hospital_log.xes");
 		hospitalLog = LogUtils.loadByFile(file);
-		//hospitalLog = miner.mineToPetrinet(context, log);
+		hospitalmodel = miner.mineToPetrinet(context, hospitalLog);
 		
 		file = new File(filePathBase + "hospital0.xes");
 		hospitalLogCluster0 = LogUtils.loadByFile(file);

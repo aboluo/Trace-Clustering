@@ -20,6 +20,7 @@ import pucpr.meincheim.master.cluster.Cluster;
 import pucpr.meincheim.master.cluster.TraceCluster;
 import pucpr.meincheim.master.miner.InductiveMiner;
 import pucpr.meincheim.master.miner.Miner;
+import pucpr.meincheim.master.quality.AyraQualityEvaluator;
 import pucpr.meincheim.master.quality.ModelQuality;
 import pucpr.meincheim.master.quality.QualityEvaluator;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
@@ -55,7 +56,8 @@ public class ExperimentLoader {
 		dependencyGraphComparisonSimilarity = new DependencyGraphComparisonSimilarity();
 
 		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
-		//filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		// filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática -
+		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 
 		validationDatesetPathBase = filePathBase + "\\Dataset\\SimilarityValidation\\";
 		experimentPathBase = filePathBase + "\\Experiment";
@@ -102,8 +104,10 @@ public class ExperimentLoader {
 		for (String logPath : getFilePaths(logsDirectory)) {
 			XLog log = LogUtils.loadByFile(new File(logPath));
 			Petrinet model = miner.mineToPetrinet(context, log);
-			QualityEvaluator qe = new QualityEvaluator(context, log, model);
-			qualities.add(qe.calculate());			
+			QualityEvaluator qe = new AyraQualityEvaluator(context, log, model);
+			//QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context, log);
+			//QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context, log);
+			qualities.add(qe.calculate());
 		}
 		return qualities;
 	}
