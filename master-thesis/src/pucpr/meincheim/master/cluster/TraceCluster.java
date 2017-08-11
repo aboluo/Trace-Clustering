@@ -56,8 +56,10 @@ public class TraceCluster {
 				}
 			}
 
-			System.out.println("instances ----> " + instanceCount);
-			System.out.println("clusters ----> " + clusters.size());
+			if (instanceCount % 100 == 0) {
+				System.out.println("instances ----> " + instanceCount);
+				System.out.println("clusters ----> " + clusters.size());
+			}
 			instanceCount++;
 		}
 

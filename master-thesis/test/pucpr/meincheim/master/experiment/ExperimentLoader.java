@@ -3,12 +3,10 @@ package pucpr.meincheim.master.experiment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.deckfour.xes.model.XLog;
-import org.junit.Before;
 import org.junit.Test;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.packages.PackageManager;
@@ -25,7 +23,13 @@ import pucpr.meincheim.master.quality.ModelQuality;
 import pucpr.meincheim.master.quality.QualityEvaluator;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
 import pucpr.meincheim.master.similarity.behavioral.DependencyGraphComparisonSimilarity;
+import pucpr.meincheim.master.similarity.behavioral.DependencyGraphSimilarity;
+import pucpr.meincheim.master.similarity.behavioral.TARSimilarity;
 import pucpr.meincheim.master.similarity.label.CommonActivityNameSimilarity;
+import pucpr.meincheim.master.similarity.label.CommonNodesEdgesSimilarity;
+import pucpr.meincheim.master.similarity.label.FeatureBasedSimilarity;
+import pucpr.meincheim.master.similarity.label.NodeLinkBasedSimilarity;
+import pucpr.meincheim.master.similarity.structural.GraphEditDistanceSimilarity;
 import pucpr.meincheim.master.similarity.structural.LaRosaSimilarity;
 import pucpr.meincheim.master.util.CsvWriter;
 import pucpr.meincheim.master.util.LogUtils;
@@ -39,64 +43,109 @@ public class ExperimentLoader {
 	protected CommonActivityNameSimilarity semanticSimilarity;
 	protected LaRosaSimilarity laRosaSimilarity;
 	protected DependencyGraphComparisonSimilarity dependencyGraphComparisonSimilarity;
+
 	protected String filePathBase;
-	protected String validationDatesetPathBase;
+	protected String datesetPathBase;
 	protected String experimentPathBase;
 
-	@Before
-	public void setup() throws URISyntaxException {
+	protected List<SimilarityMeasure> similaritiesMeasures;
+
+	public ExperimentLoader() {
 		context = new FakePluginContext();
 		PackageManager.getInstance();
 		PluginManagerImpl.initialize(UIPluginContext.class);
 		PluginManagerImpl.getInstance();
 		miner = new InductiveMiner();
 
-		semanticSimilarity = new CommonActivityNameSimilarity();
-		laRosaSimilarity = new LaRosaSimilarity();
-		dependencyGraphComparisonSimilarity = new DependencyGraphComparisonSimilarity();
+		similaritiesMeasures = new ArrayList<SimilarityMeasure>();
+
+		// Label
+		similaritiesMeasures.add(new CommonActivityNameSimilarity());
+		// similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
+		// similaritiesMeasures.add(new FeatureBasedSimilarity());
+		// similaritiesMeasures.add(new NodeLinkBasedSimilarity());
+		//
+		// // Behavioral
+		// similaritiesMeasures.add(new DependencyGraphComparisonSimilarity());
+		// similaritiesMeasures.add(new DependencyGraphSimilarity());
+		// similaritiesMeasures.add(new TARSimilarity());
+		//
+		// // Structural
+		// similaritiesMeasures.add(new GraphEditDistanceSimilarity());
+		// similaritiesMeasures.add(new LaRosaSimilarity());
 
 		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		// filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática -
 		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 
-		validationDatesetPathBase = filePathBase + "\\Dataset\\SimilarityValidation\\";
 		experimentPathBase = filePathBase + "\\Experiment";
+		datesetPathBase = experimentPathBase + "\\Dataset";
 
-		File file = new File(validationDatesetPathBase + "Hospital_log.xes");
+		File file = new File(datesetPathBase + "Hospital_log.xes");
 		hospitalLog = LogUtils.loadByFile(file);
 	}
 
 	@Test
+	public void ProcessAll() {
+		List<String> datasets = getFilePaths(datesetPathBase);
+
+		for (String dataset : datasets) {
+			File file = new File(dataset);
+			XLog log = LogUtils.loadByFile(file);
+
+			for (SimilarityMeasure sim : similaritiesMeasures) {
+
+				try {
+
+					String filename = file.getName().replace(".xes", "");
+
+					process(sim, log, filename, true, false, false, 0.4);
+					process(sim, log, filename, true, false, false, 0.6);
+					process(sim, log, filename, true, false, false, 0.8);
+	
+				} catch (IOException e) {
+
+				}
+			}
+		}
+	}
+
+	// @Test
 	public void SemanticSimilarityHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "SemanticSimilarityHospitalLog";
-		process(semanticSimilarity, hospitalLog, folderExporter, false, true);
+		process(semanticSimilarity, hospitalLog, folderExporter, false, false, true, 0.6);
 	}
 
-	@Test
+	// @Test
 	public void DependencyGraphSimilarityHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "DependencyGraphSimilaritySimilarityHospitalLog";
-		process(dependencyGraphComparisonSimilarity, hospitalLog, folderExporter, false, true);
+		process(dependencyGraphComparisonSimilarity, hospitalLog, folderExporter, false, false, true, 0.6);
 	}
 
-	@Test
+	// @Test
 	public void LaRosaHospitalLog() throws IOException {
 		String folderExporter = experimentPathBase + "\\" + "LaRosaHospitalLog";
-		process(laRosaSimilarity, hospitalLog, folderExporter, false, true);
+		process(laRosaSimilarity, hospitalLog, folderExporter, false, false, true, 0.6);
 	}
 
-	private void process(SimilarityMeasure sim, XLog log, String folderExporter, boolean cluster, boolean evaluate)
-			throws IOException {
+	private void process(SimilarityMeasure sim, XLog log, String fileName, boolean cluster, boolean recalculateCentroid,
+			boolean evaluate, double simThresold) throws IOException {
+
+		String folderExport = experimentPathBase + "\\" + String.format("%s %s %s %s",
+				fileName, sim.getClass().getSimpleName(), simThresold, recalculateCentroid);
+		;
+
 		if (cluster) {
-			TraceCluster traceCluster = new TraceCluster(context, miner, sim, false, 0.6);
+			TraceCluster traceCluster = new TraceCluster(context, miner, sim, recalculateCentroid, simThresold);
 			List<Cluster> clusters = traceCluster.cluster(log);
-			exportLogs(clusters, folderExporter);
+			exportLogs(clusters, folderExport);
 		}
 		if (evaluate) {
-			List<ModelQuality> qualities = evaluateClusterQuality(folderExporter);
+			List<ModelQuality> qualities = evaluateClusterQuality(folderExport);
 			CsvWriter csv = new CsvWriter();
-			csv.qualityExportCsv(qualities, folderExporter + ".csv");
+			csv.qualityExportCsv(qualities, folderExport + ".csv");
 		}
-		System.out.println("Process complete for " + folderExporter);
+		System.out.println("Process complete for " + folderExport);
 	}
 
 	private List<ModelQuality> evaluateClusterQuality(String logsDirectory) {
@@ -105,8 +154,10 @@ public class ExperimentLoader {
 			XLog log = LogUtils.loadByFile(new File(logPath));
 			Petrinet model = miner.mineToPetrinet(context, log);
 			QualityEvaluator qe = new AyraQualityEvaluator(context, log, model);
-			//QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context, log);
-			//QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context, log);
+			// QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context,//
+			// log);
+			// QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context,
+			// // log);
 			qualities.add(qe.calculate());
 		}
 		return qualities;
