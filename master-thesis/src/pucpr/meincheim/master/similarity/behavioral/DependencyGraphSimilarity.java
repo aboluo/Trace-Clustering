@@ -46,10 +46,10 @@ public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasu
 		Set<String> elementNamesA = new HashSet<String>();
 		Set<String> elementNamesB = new HashSet<String>();
 
-		for (PetrinetNode vertex : aGraph.getNodes()) {
+		for (PetrinetNode vertex : getLabeledElements(aGraph, true, true)) {
 			elementNamesA.add(vertex.getLabel());
 		}
-		for (PetrinetNode vertex : aGraph.getNodes()) {
+		for (PetrinetNode vertex : getLabeledElements(bGraph, true, true)) {
 			elementNamesB.add(vertex.getLabel());
 		}
 

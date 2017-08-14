@@ -18,8 +18,9 @@ import pucpr.meincheim.master.cluster.Cluster;
 import pucpr.meincheim.master.cluster.TraceCluster;
 import pucpr.meincheim.master.miner.InductiveMiner;
 import pucpr.meincheim.master.miner.Miner;
-import pucpr.meincheim.master.quality.AyraQualityEvaluator;
 import pucpr.meincheim.master.quality.ModelQuality;
+import pucpr.meincheim.master.quality.PPCPetrinetQualityEvaluator;
+import pucpr.meincheim.master.quality.PPCProcessTreeQualityEvaluator;
 import pucpr.meincheim.master.quality.QualityEvaluator;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
 import pucpr.meincheim.master.similarity.behavioral.DependencyGraphComparisonSimilarity;
@@ -60,26 +61,26 @@ public class ExperimentLoader {
 		similaritiesMeasures = new ArrayList<SimilarityMeasure>();
 
 		// Label
-		similaritiesMeasures.add(new CommonActivityNameSimilarity());
-		// similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
-		// similaritiesMeasures.add(new FeatureBasedSimilarity());
-		// similaritiesMeasures.add(new NodeLinkBasedSimilarity());
+//		similaritiesMeasures.add(new CommonActivityNameSimilarity());
+//		similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
+//		similaritiesMeasures.add(new FeatureBasedSimilarity());
+//		similaritiesMeasures.add(new NodeLinkBasedSimilarity());
 		//
 		// // Behavioral
-		// similaritiesMeasures.add(new DependencyGraphComparisonSimilarity());
-		// similaritiesMeasures.add(new DependencyGraphSimilarity());
-		// similaritiesMeasures.add(new TARSimilarity());
-		//
+//		similaritiesMeasures.add(new DependencyGraphComparisonSimilarity());
+//		similaritiesMeasures.add(new DependencyGraphSimilarity());
+		similaritiesMeasures.add(new TARSimilarity());
+
 		// // Structural
-		// similaritiesMeasures.add(new GraphEditDistanceSimilarity());
-		// similaritiesMeasures.add(new LaRosaSimilarity());
+//		similaritiesMeasures.add(new GraphEditDistanceSimilarity());
+//		similaritiesMeasures.add(new LaRosaSimilarity());
 
 		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		// filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática -
 		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 
-		experimentPathBase = filePathBase + "\\Experiment";
-		datesetPathBase = experimentPathBase + "\\Dataset";
+		experimentPathBase = filePathBase + "\\Experiment\\Results";
+		datesetPathBase =  filePathBase + "\\Experiment\\Dataset";
 
 		File file = new File(datesetPathBase + "Hospital_log.xes");
 		hospitalLog = LogUtils.loadByFile(file);
@@ -98,11 +99,12 @@ public class ExperimentLoader {
 				try {
 
 					String filename = file.getName().replace(".xes", "");
-
-					process(sim, log, filename, true, false, false, 0.4);
-					process(sim, log, filename, true, false, false, 0.6);
-					process(sim, log, filename, true, false, false, 0.8);
-	
+					process(sim, log, filename, true, false, true, 0.4);
+					System.gc();
+					process(sim, log, filename, true, false, true, 0.6);
+					System.gc();
+					process(sim, log, filename, true, false, true, 0.8);
+					System.gc();
 				} catch (IOException e) {
 
 				}
@@ -131,8 +133,8 @@ public class ExperimentLoader {
 	private void process(SimilarityMeasure sim, XLog log, String fileName, boolean cluster, boolean recalculateCentroid,
 			boolean evaluate, double simThresold) throws IOException {
 
-		String folderExport = experimentPathBase + "\\" + String.format("%s %s %s %s",
-				fileName, sim.getClass().getSimpleName(), simThresold, recalculateCentroid);
+		String folderExport = experimentPathBase + "\\" + String.format("%s %s %s %s", fileName,
+				sim.getClass().getSimpleName(), simThresold, recalculateCentroid);
 		;
 
 		if (cluster) {
@@ -153,11 +155,9 @@ public class ExperimentLoader {
 		for (String logPath : getFilePaths(logsDirectory)) {
 			XLog log = LogUtils.loadByFile(new File(logPath));
 			Petrinet model = miner.mineToPetrinet(context, log);
-			QualityEvaluator qe = new AyraQualityEvaluator(context, log, model);
-			// QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context,//
-			// log);
-			// QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context,
-			// // log);
+			// QualityEvaluator qe = new AyraQualityEvaluator(context, log, model);
+			// QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context, log);
+			QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context, log);
 			qualities.add(qe.calculate());
 		}
 		return qualities;

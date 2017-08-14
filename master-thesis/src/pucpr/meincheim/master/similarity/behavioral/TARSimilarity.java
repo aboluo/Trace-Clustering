@@ -6,6 +6,7 @@ import java.util.Set;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 import pucpr.meincheim.master.similarity.AbstractModelGraphSimilarityMeasure;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
@@ -47,11 +48,16 @@ public class TARSimilarity extends AbstractModelGraphSimilarityMeasure implement
 	private Set<TAR> getTARSet(PetrinetGraph graph) {
 		Set<TAR> tarSet = new HashSet<TARSimilarity.TAR>();
 
-		for (Object edgeObject : graph.getEdges()) {
-			PetrinetEdge edge = (PetrinetEdge) edgeObject;
-			PetrinetNode source = (PetrinetNode) edge.getSource();
-			PetrinetNode target = (PetrinetNode) edge.getTarget();
-			tarSet.add(new TAR(source.getLabel(), target.getLabel()));
+		boolean considerOnlyVisibleTransitions = true;
+
+		for (PetrinetNode transition : getLabeledElements(graph, true, considerOnlyVisibleTransitions)) {
+			PetrinetNode source = transition;
+
+			for (PetrinetNode target : getNextTransitions(new HashSet<PetrinetNode>(), source,
+					considerOnlyVisibleTransitions)) {
+				tarSet.add(new TAR(source.getLabel(), target.getLabel()));
+			}
+
 		}
 
 		return tarSet;

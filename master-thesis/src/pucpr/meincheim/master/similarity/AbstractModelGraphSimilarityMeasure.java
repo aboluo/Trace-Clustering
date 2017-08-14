@@ -13,7 +13,6 @@ import org.processmining.framework.models.ModelGraphVertex;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
-import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 public abstract class AbstractModelGraphSimilarityMeasure {
@@ -56,10 +55,10 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 				break;
 			}
 		}
-		
-		if(node == null){
+
+		if (node == null) {
 			for (PetrinetNode vertexA : graph.getNodes()) {
-				if (vertexA.getLabel().contains("source")){
+				if (vertexA.getLabel().contains("source")) {
 					node = vertexA;
 					break;
 				}
@@ -432,6 +431,52 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		return found;
 	}
 
+	// protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes,
+	// PetrinetNode actual,
+	// boolean considerOnlyVisible) {
+	//
+	// for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
+	// PetrinetNode target = (PetrinetNode) edge.getTarget();
+	//
+	// boolean toAdd = false;
+	//
+	// if (target instanceof Transition) {
+	//
+	// if (considerOnlyVisible && isInvisibleTransition(target)) {
+	// toAdd = false;
+	// } else {
+	// toAdd = true;
+	// }
+	//
+	// }
+	//
+	// if (toAdd) {
+	// nodes.add(target);
+	// } else {
+	//
+	// if (target.getGraph().getOutEdges(target).size() > 0)
+	// getNextTransitions(nodes, target, considerOnlyVisible);
+	// }
+	// }
+	// return nodes;
+	// }
+
+	protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes, PetrinetNode actual,
+			boolean considerOnlyVisible) {
+
+		for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
+			PetrinetNode target = (PetrinetNode) edge.getTarget();
+
+			if (target instanceof Transition) {
+				nodes.add(target);
+			} else {
+				if (target.getGraph().getOutEdges(target).size() > 0)
+					getNextTransitions(nodes, target, considerOnlyVisible);
+			}
+		}
+		return nodes;
+	}
+
 	/**
 	 * Returns the transitive closure of the predecessors of a given vertex
 	 * along the line of the node type given by the cont-class.
@@ -488,12 +533,7 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		if (depth < maxDepth) {
 			for (Object edgeObject : vertex.getGraph().getInEdges(vertex)) {
 				PetrinetEdge<PetrinetNode, PetrinetNode> inEdge = (PetrinetEdge) edgeObject;
-				// if (inEdge.getSource().getClass().equals(cont)) {
-				// getTransitiveClosurePredecessors(inEdge.getSource(), cont,
-				// predecessors, depth + 1, maxDepth);
-				// } else {
 				predecessors.add(inEdge.getSource());
-				// }
 			}
 		}
 
@@ -505,12 +545,7 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		if (dept < maxDepth) {
 			for (Object edgeObject : vertex.getGraph().getOutEdges(vertex)) {
 				PetrinetEdge<PetrinetNode, PetrinetNode> outEdge = (PetrinetEdge) edgeObject;
-				// if (outEdge.getTarget().getClass().equals(cont)) {
-				// getTransitiveClosureSuccessors(outEdge.getTarget(), cont,
-				// successors, dept + 1, maxDepth);
-				// } else {
 				successors.add(outEdge.getTarget());
-				// }
 			}
 		}
 		return successors;

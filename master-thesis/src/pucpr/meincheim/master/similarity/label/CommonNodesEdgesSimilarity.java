@@ -45,6 +45,7 @@ public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeas
 		// mapping
 		Set<PetrinetNode> verticesOnlyInA = new HashSet<PetrinetNode>(getLabeledElements(aGraph,true,true));
 		Set<PetrinetNode> verticesOnlyInB = new HashSet<PetrinetNode>(getLabeledElements(bGraph,true,true));
+		
 		verticesOnlyInA.removeAll(mappingsAB.keySet());
 		verticesOnlyInB.removeAll(mappingsBA.keySet());
 
