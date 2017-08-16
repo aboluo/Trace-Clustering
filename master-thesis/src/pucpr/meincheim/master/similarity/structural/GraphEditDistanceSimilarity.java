@@ -102,6 +102,9 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 				mappingsBA.put(match, vertexA);
 			}
 		}
+		
+		mappingsAB.putAll(getPlacesMapping(modelA, modelB));
+		mappingsBA.putAll(getPlacesMapping(modelB, modelA));
 
 		Set<PetrinetNode> deletedVertices = new HashSet<PetrinetNode>();
 		Set<PetrinetNode> addedVertices = new HashSet<PetrinetNode>();

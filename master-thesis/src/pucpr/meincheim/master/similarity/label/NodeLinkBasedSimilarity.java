@@ -157,12 +157,12 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 			Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
 		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilarities = new HashMap<PetrinetNode, Map<PetrinetNode, Double>>();
 
-		for (PetrinetNode vertexA : a.getTransitions()) {
+		for (PetrinetNode vertexA : getLabeledElements(a, true, true)) {
 			PetrinetNode mappedVertex = null;
 			Map<PetrinetNode, Double> similaritiesA = new HashMap<PetrinetNode, Double>();
 
 			double maxSim = 0;
-			for (PetrinetNode vertexB : b.getTransitions()) {
+			for (PetrinetNode vertexB : getLabeledElements(b, true, true)) {
 				double simAB = nodeSimilarity.calculateSimilarity(vertexA, vertexB);
 
 				similaritiesA.put(vertexB, simAB);
