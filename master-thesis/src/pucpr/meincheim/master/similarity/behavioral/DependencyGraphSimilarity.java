@@ -16,11 +16,11 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * Bae et al.: Process mining, discovery, and integration using distance
  * measures.
  * 
- * @author Alex Meincheim 
+ * @author Alex Meincheim
  * 
- * Implementation based on Michael Becker.
+ *         Implementation based on Michael Becker.
  * 
- * Customized for ProM 6 and Petri net models
+ *         Customized for ProM 6 and Petri net models
  * 
  */
 public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasure
@@ -67,9 +67,12 @@ public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasu
 		Map<PetrinetNode, PetrinetNode> mappingsAB = getMapping(aGraph, bGraph);
 		Map<PetrinetNode, PetrinetNode> mappingsBA = getMapping(bGraph, aGraph);
 
+		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
+		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
+
 		Set<PetrinetEdge> edgesOnlyInA = getEdgesOnlyInOneModel(aGraph, bGraph, mappingsAB);
 		Set<PetrinetEdge> edgesOnlyInB = getEdgesOnlyInOneModel(bGraph, aGraph, mappingsBA);
-	
+
 		return 1.0 / (1.0 + edgesOnlyInA.size() + edgesOnlyInB.size());
 	}
 }

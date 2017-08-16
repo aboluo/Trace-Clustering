@@ -1,4 +1,4 @@
-package pucpr.meincheim.master.similarity;
+package pucpr.meincheim.master.similarity.behavioral;
 
 
 import org.junit.Assert;

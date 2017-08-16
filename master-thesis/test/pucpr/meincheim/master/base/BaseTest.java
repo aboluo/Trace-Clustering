@@ -43,9 +43,9 @@ public abstract class BaseTest extends AbstractModelGraphSimilarityMeasure{
 		PluginManagerImpl.getInstance();
 		miner = new InductiveMiner();
 
-		String filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação\\Dataset\\SimilarityValidation\\";
+		//String filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação\\Dataset\\SimilarityValidation\\";
 		
-		//String filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação\\Dataset\\SimilarityValidation\\";
+		String filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação\\Dataset\\SimilarityValidation\\";
 
 		File file = new File(filePathBase + "model0.xes");
 		logmodel0 = LogUtils.loadByFile(file);
