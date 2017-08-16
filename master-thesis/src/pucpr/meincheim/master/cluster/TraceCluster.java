@@ -38,6 +38,7 @@ public class TraceCluster {
 		int instanceCount = 0;
 
 		for (XTrace trace : logs) {
+			
 			XLog nLog = LogUtils.createNewLog(trace);
 			Petrinet net = miner.mineToPetrinet(uiContext, nLog);
 
@@ -65,8 +66,8 @@ public class TraceCluster {
 
 		System.out.println("Cluster size " + clusters.size());
 
-		for (Cluster cluster : clusters)
-			cluster.setModel(miner.mineToPetrinet(uiContext, cluster.getLog()));
+//		for (Cluster cluster : clusters)
+//			cluster.setModel(miner.mineToPetrinet(uiContext, cluster.getLog()));
 
 		return clusters;
 

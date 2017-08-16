@@ -3,6 +3,7 @@ package pucpr.meincheim.master.quality;
 import java.util.Set;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.deckfour.xes.model.XLog;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.semantics.petrinet.Marking;
@@ -13,6 +14,10 @@ public abstract class QualityEvaluator {
 	public ModelQuality calculate() {
 		throw new NotImplementedException();
 	};
+
+	public void loadMapping(XLog log) {
+		throw new NotImplementedException();
+	}
 
 	public Marking getInitialMarking(Petrinet net) {
 		Set<Place> places = PetrinetUtils.getStartPlaces(net);

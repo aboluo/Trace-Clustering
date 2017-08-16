@@ -8,17 +8,21 @@ import org.processmining.plugins.InductiveMiner.plugins.IMProcessTree;
 import org.processmining.processtree.ProcessTree;
 
 public class InductiveMiner implements Miner {
-	
-	public Petrinet mineToPetrinet(UIPluginContext context, XLog log) {		
-		IMPetriNet miner = new IMPetriNet();
-		return (Petrinet)miner.minePetriNet(context, log)[0];		
+
+	private static IMProcessTree processTreeMiner;
+	private static IMPetriNet petrinetMiner;
+
+	public InductiveMiner() {
+		processTreeMiner = new IMProcessTree();
+		petrinetMiner = new IMPetriNet();
 	}
-	
-	
-	public ProcessTree mineToProcessTree(UIPluginContext context, XLog log) {		
-		IMProcessTree miner = new IMProcessTree();
-		return miner.mineProcessTree(context, log);		
+
+	public Petrinet mineToPetrinet(UIPluginContext context, XLog log) {
+		return (Petrinet) petrinetMiner.minePetriNet(context, log)[0];
 	}
-	
-	
+
+	public ProcessTree mineToProcessTree(UIPluginContext context, XLog log) {
+		return processTreeMiner.mineProcessTree(context, log);
+	}
+
 }

@@ -19,19 +19,27 @@ public class PPCProcessTreeQualityEvaluator extends QualityEvaluator {
 
 	private XLog log;
 	private ProcessTree model;
+	private InductiveMiner miner;
+	private UIPluginContext context;
 
-	public PPCProcessTreeQualityEvaluator(UIPluginContext context, XLog log) {
+	public PPCProcessTreeQualityEvaluator(UIPluginContext context, InductiveMiner miner) {
+		this.context = context;
+		this.miner = miner;
+	}
+
+	public void loadMapping(XLog log) {
 		this.log = log;
-		model = new InductiveMiner().mineToProcessTree(context, log);
+		model = miner.mineToProcessTree(context, log);
 	}
 
 	private ProjectedRecallPrecisionResult pccCalculate()
-			throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {		
+			throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {
 		int num = new EfficientTree(model).getInt2activity().length;
 		CompareParametersDialog dialog = new CompareParametersDialog(log, num, RecallName.fitness);
 		CompareParameters parameters = dialog.getMiningParameters();
 		parameters.setK(1);
-		return CompareLog2ProcessTreePluginScaledLogPrecision.measure(log, model, parameters, ProMCanceller.NEVER_CANCEL);
+		return CompareLog2ProcessTreePluginScaledLogPrecision.measure(log, model, parameters,
+				ProMCanceller.NEVER_CANCEL);
 	}
 
 	public ModelQuality calculate() {

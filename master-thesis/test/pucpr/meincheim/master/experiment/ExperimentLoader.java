@@ -19,7 +19,6 @@ import pucpr.meincheim.master.cluster.TraceCluster;
 import pucpr.meincheim.master.miner.InductiveMiner;
 import pucpr.meincheim.master.miner.Miner;
 import pucpr.meincheim.master.quality.ModelQuality;
-import pucpr.meincheim.master.quality.PPCPetrinetQualityEvaluator;
 import pucpr.meincheim.master.quality.PPCProcessTreeQualityEvaluator;
 import pucpr.meincheim.master.quality.QualityEvaluator;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
@@ -29,7 +28,6 @@ import pucpr.meincheim.master.similarity.behavioral.TARSimilarity;
 import pucpr.meincheim.master.similarity.label.CommonActivityNameSimilarity;
 import pucpr.meincheim.master.similarity.label.CommonNodesEdgesSimilarity;
 import pucpr.meincheim.master.similarity.label.FeatureBasedSimilarity;
-import pucpr.meincheim.master.similarity.label.NodeLinkBasedSimilarity;
 import pucpr.meincheim.master.similarity.structural.GraphEditDistanceSimilarity;
 import pucpr.meincheim.master.similarity.structural.LaRosaSimilarity;
 import pucpr.meincheim.master.util.CsvWriter;
@@ -51,6 +49,8 @@ public class ExperimentLoader {
 
 	protected List<SimilarityMeasure> similaritiesMeasures;
 
+	protected QualityEvaluator qualityEvaluator;
+
 	public ExperimentLoader() {
 		context = new FakePluginContext();
 		PackageManager.getInstance();
@@ -58,29 +58,36 @@ public class ExperimentLoader {
 		PluginManagerImpl.getInstance();
 		miner = new InductiveMiner();
 
+		qualityEvaluator = new PPCProcessTreeQualityEvaluator(context, (InductiveMiner) miner);
+
+		// QualityEvaluator qe = new AyraQualityEvaluator(context, log,
+		// model);
+		// QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context,
+		// log);
+
 		similaritiesMeasures = new ArrayList<SimilarityMeasure>();
 
 		// Label
-//		similaritiesMeasures.add(new CommonActivityNameSimilarity());
-//		similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
-//		similaritiesMeasures.add(new FeatureBasedSimilarity());
-//		similaritiesMeasures.add(new NodeLinkBasedSimilarity());
+		similaritiesMeasures.add(new CommonActivityNameSimilarity());
+		similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
+		similaritiesMeasures.add(new FeatureBasedSimilarity());
+		// similaritiesMeasures.add(new NodeLinkBasedSimilarity());
 		//
 		// // Behavioral
-//		similaritiesMeasures.add(new DependencyGraphComparisonSimilarity());
-//		similaritiesMeasures.add(new DependencyGraphSimilarity());
+		similaritiesMeasures.add(new DependencyGraphComparisonSimilarity());
+		similaritiesMeasures.add(new DependencyGraphSimilarity());
 		similaritiesMeasures.add(new TARSimilarity());
 
 		// // Structural
-//		similaritiesMeasures.add(new GraphEditDistanceSimilarity());
-//		similaritiesMeasures.add(new LaRosaSimilarity());
+		similaritiesMeasures.add(new GraphEditDistanceSimilarity());
+		similaritiesMeasures.add(new LaRosaSimilarity());
 
 		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		// filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática -
 		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 
 		experimentPathBase = filePathBase + "\\Experiment\\Results";
-		datesetPathBase =  filePathBase + "\\Experiment\\Dataset";
+		datesetPathBase = filePathBase + "\\Experiment\\Dataset";
 
 		File file = new File(datesetPathBase + "Hospital_log.xes");
 		hospitalLog = LogUtils.loadByFile(file);
@@ -155,10 +162,8 @@ public class ExperimentLoader {
 		for (String logPath : getFilePaths(logsDirectory)) {
 			XLog log = LogUtils.loadByFile(new File(logPath));
 			Petrinet model = miner.mineToPetrinet(context, log);
-			// QualityEvaluator qe = new AyraQualityEvaluator(context, log, model);
-			// QualityEvaluator qe = new PPCPetrinetQualityEvaluator(context, log);
-			QualityEvaluator qe = new PPCProcessTreeQualityEvaluator(context, log);
-			qualities.add(qe.calculate());
+			qualityEvaluator.loadMapping(log);
+			qualities.add(qualityEvaluator.calculate());
 		}
 		return qualities;
 	}
