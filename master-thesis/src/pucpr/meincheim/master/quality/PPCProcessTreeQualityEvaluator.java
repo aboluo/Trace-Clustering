@@ -32,7 +32,7 @@ public class PPCProcessTreeQualityEvaluator extends QualityEvaluator {
 		model = miner.mineToProcessTree(context, log);
 	}
 
-	private ProjectedRecallPrecisionResult pccCalculate()
+	public ProjectedRecallPrecisionResult pccCalculate()
 			throws AutomatonFailedException, InterruptedException, ProjectedMeasuresFailedException {
 		int num = new EfficientTree(model).getInt2activity().length;
 		CompareParametersDialog dialog = new CompareParametersDialog(log, num, RecallName.fitness);
