@@ -8,6 +8,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.petrinets.utils.PetriNetUtils;
 import org.processmining.plugins.astar.petrinet.PetrinetReplayerWithILP;
+import org.processmining.plugins.astar.petrinet.PetrinetReplayerWithoutILP;
 import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMapping;
 import org.processmining.plugins.kutoolbox.utils.PetrinetUtils;
 import org.processmining.plugins.petrinet.replayer.PNLogReplayer;
@@ -25,22 +26,34 @@ import be.kuleuven.econ.cbf.input.Mapping;
 import be.kuleuven.econ.cbf.input.MemoryMapping;
 import be.kuleuven.econ.cbf.utils.MappingUtils;
 import nl.tue.astar.AStarException;
+import pucpr.meincheim.master.miner.Miner;
 
 public class AyraQualityEvaluator extends QualityEvaluator {
 
 	private Mapping mapping;
 	private TransEvClassMapping transMapping;
 	private UIPluginContext context;
+	private Miner miner;
 
-	public AyraQualityEvaluator(UIPluginContext context, XLog log, Petrinet net) {
+	public AyraQualityEvaluator(UIPluginContext context, Miner miner) {
+		this.miner = miner;
+		this.context = context;
+	}
+	
+	public Mapping getMapping(){
+		return this.mapping;
+	}
+	
+	@Override
+	public void loadMapping(XLog log) {
+		Petrinet net = miner.mineToPetrinet(context, log);
 		this.mapping = new MemoryMapping(log, net);
 		MappingUtils.setInvisiblesInPetrinet(mapping, mapping.getPetrinet());
 		this.transMapping = MappingUtils.getTransEvClassMapping(mapping, net, log);
-		this.context = context;
 	}
 
 	public double calculateRecall() throws AStarException {
-		IPNReplayAlgorithm alg = new PetrinetReplayerWithILP();
+		IPNReplayAlgorithm alg = new PetrinetReplayerWithoutILP();
 		IPNReplayParamProvider provider = alg.constructParamProvider(context, mapping.getPetrinet(), mapping.getLog(),
 				transMapping);
 		JComponent paramUI = provider.constructUI();

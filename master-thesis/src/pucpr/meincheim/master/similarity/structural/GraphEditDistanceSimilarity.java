@@ -77,10 +77,13 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 		Map<PetrinetNode, PetrinetNode> mappingsBA = new HashMap<PetrinetNode, PetrinetNode>();
 		Map<PetrinetNode, Map<PetrinetNode, Double>> similarities = new HashMap<PetrinetNode, Map<PetrinetNode, Double>>();
 
-		for (PetrinetNode vertexA : getLabeledElements(modelA, true, true)) {
-			double maxSim = 0;
+		Set<PetrinetNode> aModelElements = getLabeledElements(modelA, true, true);
+		Set<PetrinetNode> bModelElements = getLabeledElements(modelB, true, true);
+
+		for (PetrinetNode vertexA : aModelElements) {
+			double maxSim = 0.8;
 			PetrinetNode match = null;
-			for (PetrinetNode vertexB : getLabeledElements(modelB, true, true)) {
+			for (PetrinetNode vertexB : bModelElements) {
 				double simAB = similarityStrategy.calculateSimilarity(vertexA, vertexB);
 
 				if (simAB > maxSim) {
@@ -102,27 +105,27 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 				mappingsBA.put(match, vertexA);
 			}
 		}
-		
-		mappingsAB.putAll(getPlacesMapping(modelA, modelB));
-		mappingsBA.putAll(getPlacesMapping(modelB, modelA));
 
 		Set<PetrinetNode> deletedVertices = new HashSet<PetrinetNode>();
 		Set<PetrinetNode> addedVertices = new HashSet<PetrinetNode>();
 
 		// calculate the set of deleted vertices
-		for (PetrinetNode vertex : getLabeledElements(modelA, true, true)) {
+		for (PetrinetNode vertex : aModelElements) {
 			if (!mappingsAB.containsKey(vertex)) {
 				deletedVertices.add(vertex);
 			}
 		}
 
 		// calculate the set of added vertices
-		for (PetrinetNode vertex : getLabeledElements(modelB, true, true)) {
+		for (PetrinetNode vertex : bModelElements) {
 			if (!mappingsAB.containsValue(vertex)) {
 				addedVertices.add(vertex);
 			}
 		}
 
+		mappingsAB.putAll(getPlacesMapping(modelA, modelB));
+		mappingsBA.putAll(getPlacesMapping(modelB, modelA));
+		
 		// calculate the set of deleted and added edges
 		Set<PetrinetEdge> deletedEdges = getEdgesOnlyInOneModel(modelA, modelB, mappingsAB);
 		Set<PetrinetEdge> addedEdges = getEdgesOnlyInOneModel(modelB, modelA, mappingsBA);
@@ -139,14 +142,13 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 		double fsubn = 0;
 
 		fskipn = (double) (deletedVertices.size() + addedVertices.size())
-				/ (double) (getLabeledElements(modelA, true, true).size()
-						+ getLabeledElements(modelB, true, true).size());
+				/ (double) (aModelElements.size() + bModelElements.size());
 
 		fskipe = (double) (deletedEdges.size() + addedEdges.size())
 				/ (double) (modelA.getEdges().size() + modelB.getEdges().size());
 
-		fsubn = 2.0 * simDist / (getLabeledElements(modelA, true, true).size()
-				+ getLabeledElements(modelB, true, true).size() - deletedVertices.size() - addedVertices.size());
+		fsubn = 2.0 * simDist
+				/ (aModelElements.size() + bModelElements.size() - deletedVertices.size() - addedVertices.size());
 
 		return 1.0 - (wskipn * fskipn + wskipe * fskipe + wsubn * fsubn) / (wskipn + wskipe + wsubn);
 	}

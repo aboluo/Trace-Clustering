@@ -33,21 +33,18 @@ public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeas
 
 	public double calculateSimilarity(PetrinetGraph aGraph, PetrinetGraph bGraph)  {
 
-// requirement for this similarity measure: names of tasks must be
-// unique in one model
-//		checkUniqueElementNames(aGraph);
-//		checkUniqueElementNames(bGraph);
-
 		Map<PetrinetNode, PetrinetNode> mappingsAB = getMapping(aGraph, bGraph);
 		Map<PetrinetNode, PetrinetNode> mappingsBA = getMapping(bGraph, aGraph);
 
-		// create the set of vertices contained only in one model based on the
-		// mapping
+		// create the set of vertices contained only in one model based on the mapping
 		Set<PetrinetNode> verticesOnlyInA = new HashSet<PetrinetNode>(getLabeledElements(aGraph,true,true));
 		Set<PetrinetNode> verticesOnlyInB = new HashSet<PetrinetNode>(getLabeledElements(bGraph,true,true));
 		
 		verticesOnlyInA.removeAll(mappingsAB.keySet());
 		verticesOnlyInB.removeAll(mappingsBA.keySet());
+		
+		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
+		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
 
 		// search for edges within a but not in b
 		Set<PetrinetEdge> edgesOnlyInA = getEdgesOnlyInOneModel(aGraph, bGraph, mappingsAB);
@@ -59,15 +56,4 @@ public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeas
 				+ aGraph.getEdges().size() + bGraph.getEdges().size());
 	}
 
-//	private void checkUniqueElementNames(ModelGraph graph) throws Exception {
-//		Set<String> visited = new HashSet<String>();
-//		for (ModelGraphVertex vertex : graph.getVerticeList()) {
-//			if (visited.contains(vertex.getIdentifier())) {
-//				throw new Exception("Model " + graph + " contains the element with label " + vertex.getIdentifier()
-//						+ " more than one time");
-//			} else {
-//				visited.add(vertex.getIdentifier());
-//			}
-//		}
-//	}
 }
