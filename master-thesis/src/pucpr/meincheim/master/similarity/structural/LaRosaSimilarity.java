@@ -83,7 +83,7 @@ public class LaRosaSimilarity extends AbstractModelGraphSimilarityMeasure implem
 
 			if (!isInvisibleTransition(nodeA)) {
 
-				double maxSim = 0.99;
+				double maxSim = 0.80;
 				PetrinetNode match = null;
 
 				for (PetrinetNode nodeB : modelB.getTransitions()) {

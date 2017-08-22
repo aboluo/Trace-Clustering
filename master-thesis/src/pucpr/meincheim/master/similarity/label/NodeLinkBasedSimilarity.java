@@ -31,15 +31,13 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * et al. does not concretise the approach.
  * 
  * 
- * @author Alex Meincheim 
+ * @author Alex Meincheim
  * 
- * Implementation based on Michael Becker.
- * 
- * Customized for ProM 6 and Petri net models
- * 
+ *         Implementation based on Michael Becker.
+ *         Customized for ProM 6 and Petri net models
  */
 
-//TODO: Rever questão dos nodes
+// TODO: Rever questão dos nodes
 public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetGraph> {
 
@@ -64,6 +62,11 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesBA = calculateMaxNodeSimilarities(modelB,
 				modelA, nodeSimilaritiesBA);
 
+		Map<PetrinetNode, Map<PetrinetNode, Double>> maxPlaceSimilaritiesAB = calculatePlaceSimilarities(modelA, modelB,
+				nodeSimilaritiesAB);
+		Map<PetrinetNode, Map<PetrinetNode, Double>> maxPlaceSimilaritiesBA = calculatePlaceSimilarities(modelB, modelA,
+				nodeSimilaritiesBA);
+
 		Map<PetrinetEdge, Map<PetrinetEdge, Double>> maxEdgeSimilaritiesAB = calculateMaxEdgeSimilarities(modelA,
 				modelB, nodeSimilaritiesAB);
 		Map<PetrinetEdge, Map<PetrinetEdge, Double>> maxEdgeSimilaritiesBA = calculateMaxEdgeSimilarities(modelB,
@@ -72,7 +75,9 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		Map<PetrinetEdge, Double> edgeWeightsA = calculateEdgeWeights(modelA);
 		Map<PetrinetEdge, Double> edgeWeightsB = calculateEdgeWeights(modelB);
 
-		double simNodeSum = calculateSimNodeSum(maxNodeSimilaritiesAB) + calculateSimNodeSum(maxNodeSimilaritiesBA);
+		double simNodeSum = calculateSimNodeSum(maxNodeSimilaritiesAB) + calculateSimNodeSum(maxNodeSimilaritiesBA)
+				+ calculateSimNodeSum(maxPlaceSimilaritiesAB) + calculateSimNodeSum(maxPlaceSimilaritiesBA);
+
 		double simEdgeSum = calculateSimEdgeSum(maxEdgeSimilaritiesAB, edgeWeightsA, edgeWeightsB)
 				+ calculateSimEdgeSum(maxEdgeSimilaritiesBA, edgeWeightsB, edgeWeightsA);
 
@@ -91,24 +96,24 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 	 *            the model to calculate the edge weights for
 	 * @return the weights of edges of the given model
 	 */
-	//TODO: Rever 
+	// TODO: Rever
 	private Map<PetrinetEdge, Double> calculateEdgeWeights(PetrinetGraph model) {
 		Map<PetrinetEdge, Double> edgeWeights = new HashMap<PetrinetEdge, Double>();
 
 		for (Object edgeObject : model.getEdges()) {
 			PetrinetEdge edge = (PetrinetEdge) edgeObject;
-//			if ((null != edge.getStyle()) && edge.getStyle().equals("X")) {
-//				int cases;
-//				if (1 < edge.getSource().getOutEdges().size()) {
-//					cases = edge.getSource().getOutEdges().size();
-//				} else {
-//					cases = edge.getDest().getInEdges().size();
-//				}
-//
-//				edgeWeights.put(edge, 1.0 / cases);
-//			} else {
-				edgeWeights.put(edge, 1.0);
-//			}
+			// if ((null != edge.getStyle()) && edge.getStyle().equals("X")) {
+			// int cases;
+			// if (1 < edge.getSource().getOutEdges().size()) {
+			// cases = edge.getSource().getOutEdges().size();
+			// } else {
+			// cases = edge.getDest().getInEdges().size();
+			// }
+			//
+			// edgeWeights.put(edge, 1.0 / cases);
+			// } else {
+			edgeWeights.put(edge, 1.0);
+			// }
 		}
 
 		return edgeWeights;
@@ -131,7 +136,9 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 				PetrinetEdge edgeB = (PetrinetEdge) edgeObjectB;
 
 				double simSrc = nodeSimilarities.get(edgeA.getSource()).get(edgeB.getSource());
+				
 				double simDest = nodeSimilarities.get(edgeA.getTarget()).get(edgeB.getTarget());
+				
 				double simEdge = (simSrc + simDest) / 2.0;
 
 				similaritiesA.put(edgeB, simEdge);
@@ -151,6 +158,44 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		}
 
 		return maxEdgeSimilarities;
+	}
+
+	// TODO: Rever
+	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculatePlaceSimilarities(PetrinetGraph a, PetrinetGraph b,
+			Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
+		
+		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilarities = new HashMap<PetrinetNode, Map<PetrinetNode, Double>>();
+
+		for (PetrinetNode vertexA : a.getPlaces()) {
+			PetrinetNode mappedVertex = null;
+
+			Map<PetrinetNode, Double> similaritiesA = new HashMap<PetrinetNode, Double>();
+
+			for (PetrinetNode vertexB : b.getPlaces()) {
+				boolean matchInEdges = checkMatchInEdges(a, b, vertexA, vertexB);
+				double simAB = 0;
+
+				if (matchInEdges) {
+					boolean matchOutEdges = checkMatchOutEdges(a, b, vertexA, vertexB);
+
+					if (matchOutEdges) {
+						mappedVertex = vertexB;
+						simAB = 1.0;
+					}
+				}
+
+				similaritiesA.put(vertexB, simAB);
+			}
+
+			nodeSimilarities.put(vertexA, similaritiesA);
+			if (mappedVertex != null) {
+				Map<PetrinetNode, Double> maxNodeSimilarity = new HashMap<PetrinetNode, Double>();
+				maxNodeSimilarity.put(mappedVertex, 1.0);
+				maxNodeSimilarities.put(vertexA, maxNodeSimilarity);
+			}
+		}
+
+		return maxNodeSimilarities;
 	}
 
 	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculateMaxNodeSimilarities(PetrinetGraph a, PetrinetGraph b,
@@ -202,7 +247,7 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 
 		return simSum;
 	}
-	
+
 	private double calculateSimNodeSum(Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
 		double simSum = 0;
 

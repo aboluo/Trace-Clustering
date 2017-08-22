@@ -68,7 +68,7 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		return node;
 	}
 
-	private boolean checkMatchInEdges(PetrinetGraph from, PetrinetGraph to, PetrinetNode vertexA,
+	protected boolean checkMatchInEdges(PetrinetGraph from, PetrinetGraph to, PetrinetNode vertexA,
 			PetrinetNode vertexB) {
 		Collection<PetrinetEdge<?, ?>> edgesInVertexA = from.getInEdges(vertexA);
 		Collection<PetrinetEdge<?, ?>> edgesInVertexB = to.getInEdges(vertexB);
@@ -95,7 +95,7 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		return matchInEdges;
 	}
 
-	private boolean checkMatchOutEdges(PetrinetGraph from, PetrinetGraph to, PetrinetNode vertexA,
+	protected boolean checkMatchOutEdges(PetrinetGraph from, PetrinetGraph to, PetrinetNode vertexA,
 			PetrinetNode vertexB) {
 		Collection<PetrinetEdge<?, ?>> edgesOutVertexA = from.getOutEdges(vertexA);
 		Collection<PetrinetEdge<?, ?>> edgesOutVertexB = to.getOutEdges(vertexB);
