@@ -35,81 +35,65 @@ import pucpr.meincheim.master.util.LogUtils;
 
 public class ExperimentLoaderTest {
 
-	protected UIPluginContext context;
-	protected XLog hospitalLog;
-	protected Miner miner;
-
 	protected String filePathBase;
 	protected String datesetPathBase;
-	protected String experimentPathBase;
 
 	protected List<SimilarityMeasure> similaritiesMeasures;
 
 	protected QualityEvaluator qualityEvaluator;
-
-	private boolean evaluate = true;
-	private boolean cluster = false;
+	
+	protected ExperimentLoader loader;
 
 	private File currentFile;
 	private XLog currentLog;
 
 	public ExperimentLoaderTest() {
-		context = new FakePluginContext();
-		PackageManager.getInstance();
-		PluginManagerImpl.initialize(UIPluginContext.class);
-		PluginManagerImpl.getInstance();
-		miner = new InductiveMiner();
-
 		// filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática -
 		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		
 		filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
-
-		experimentPathBase = filePathBase + "\\Experiment\\Results";
-		datesetPathBase = filePathBase + "\\Experiment\\Dataset";
-
+		loader = new ExperimentLoader(filePathBase, false, true);
 		currentFile = new File(datesetPathBase + "\\01Hospital_log.xes");
 		currentLog = LogUtils.loadByFile(currentFile);
 	}
 
-	
-
 	@Test
 	public void CommonActivityNameSimilarity() {
-		protocol(currentFile, currentLog, new CommonActivityNameSimilarity());
+		loader.load(currentFile, currentLog, new CommonActivityNameSimilarity());
 	}
 
 	@Test
 	public void CommonNodesEdgesSimilarity() {
-		protocol(currentFile, currentLog, new CommonNodesEdgesSimilarity());
+		loader.load(currentFile, currentLog, new CommonNodesEdgesSimilarity());
 	}
 
 	@Test
 	public void FeatureBasedSimilarity() {
-		protocol(currentFile, currentLog, new FeatureBasedSimilarity());
+		loader.load(currentFile, currentLog, new FeatureBasedSimilarity());
 	}
 
 	// @Test
 	public void NodeLinkBasedSimilarity() {
-		protocol(currentFile, currentLog, new NodeLinkBasedSimilarity());
+		loader.load(currentFile, currentLog, new NodeLinkBasedSimilarity());
 	}
 
 	@Test
 	public void DependencyGraphComparisonSimilarity() {
-		protocol(currentFile, currentLog, new DependencyGraphComparisonSimilarity());
+		loader.load(currentFile, currentLog, new DependencyGraphComparisonSimilarity());
 	}
 
 	@Test
 	public void TARSimilarity() {
-		protocol(currentFile, currentLog, new TARSimilarity());
+		loader.load(currentFile, currentLog, new TARSimilarity());
 	}
 
 	@Test
 	public void GraphEditDistanceSimilarity() {
-		protocol(currentFile, currentLog, new GraphEditDistanceSimilarity());
+		loader.load(currentFile, currentLog, new GraphEditDistanceSimilarity());
 	}
 
 	@Test
 	public void LaRosaSimilarity() {
-		protocol(currentFile, currentLog, new LaRosaSimilarity());
+		loader.load(currentFile, currentLog, new LaRosaSimilarity());
 	}
 }
