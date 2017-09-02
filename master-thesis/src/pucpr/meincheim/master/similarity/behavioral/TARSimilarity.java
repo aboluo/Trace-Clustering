@@ -48,7 +48,7 @@ public class TARSimilarity extends AbstractModelGraphSimilarityMeasure implement
 	private Set<TAR> getTARSet(PetrinetGraph graph) {
 		Set<TAR> tarSet = new HashSet<TARSimilarity.TAR>();
 
-		boolean considerOnlyVisibleTransitions = true;
+		boolean considerOnlyVisibleTransitions = false;
 
 		for (PetrinetNode transition : getLabeledElements(graph, true, considerOnlyVisibleTransitions)) {
 			PetrinetNode source = transition;
