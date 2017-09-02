@@ -35,6 +35,9 @@ public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeas
 
 		Map<PetrinetNode, PetrinetNode> mappingsAB = getMapping(aGraph, bGraph);
 		Map<PetrinetNode, PetrinetNode> mappingsBA = getMapping(bGraph, aGraph);
+		
+		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
+		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
 
 		// create the set of vertices contained only in one model based on the mapping
 		Set<PetrinetNode> verticesOnlyInA = new HashSet<PetrinetNode>(getLabeledElements(aGraph,true,true));
@@ -42,10 +45,7 @@ public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeas
 		
 		verticesOnlyInA.removeAll(mappingsAB.keySet());
 		verticesOnlyInB.removeAll(mappingsBA.keySet());
-		
-		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
-		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
-
+	
 		// search for edges within a but not in b
 		Set<PetrinetEdge> edgesOnlyInA = getEdgesOnlyInOneModel(aGraph, bGraph, mappingsAB);
 		Set<PetrinetEdge> edgesOnlyInB = getEdgesOnlyInOneModel(bGraph, aGraph, mappingsBA);

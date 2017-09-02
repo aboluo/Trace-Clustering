@@ -105,6 +105,9 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 				mappingsBA.put(match, vertexA);
 			}
 		}
+		
+		mappingsAB.putAll(getPlacesMapping(modelA, modelB));
+		mappingsBA.putAll(getPlacesMapping(modelB, modelA));
 
 		Set<PetrinetNode> deletedVertices = new HashSet<PetrinetNode>();
 		Set<PetrinetNode> addedVertices = new HashSet<PetrinetNode>();
@@ -122,9 +125,6 @@ public class GraphEditDistanceSimilarity extends AbstractModelGraphSimilarityMea
 				addedVertices.add(vertex);
 			}
 		}
-
-		mappingsAB.putAll(getPlacesMapping(modelA, modelB));
-		mappingsBA.putAll(getPlacesMapping(modelB, modelA));
 		
 		// calculate the set of deleted and added edges
 		Set<PetrinetEdge> deletedEdges = getEdgesOnlyInOneModel(modelA, modelB, mappingsAB);

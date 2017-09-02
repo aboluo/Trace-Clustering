@@ -20,7 +20,7 @@ public class DependencyGraphSimilarityTest extends BaseTest {
 		Assert.assertEquals(1, result, 0);
 			
 		result = sim.calculateSimilarity(model0, model1);
-	
+		System.out.println(result);
 	}
 
 }

@@ -1,6 +1,7 @@
 package pucpr.meincheim.master.similarity;
 
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 
 /**
  * Similarity of two process graph nodes according to Yan et al.: Fast Business
@@ -37,11 +38,20 @@ public class RoleFeatureSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetNode> {
 
 	public double calculateSimilarity(PetrinetNode a, PetrinetNode b) {
-		// determine amount of incoming and outgoing edges for both vertices
-		int predA = null == a.getGraph().getInEdges(a) ? 0 : a.getGraph().getInEdges(a).size();
-		int succA = null == a.getGraph().getOutEdges(a) ? 0 : a.getGraph().getOutEdges(a).size();
-		int predB = null == b.getGraph().getInEdges(a) ? 0 : b.getGraph().getInEdges(a).size();
-		int succB = null == b.getGraph().getOutEdges(b) ? 0 : b.getGraph().getOutEdges(b).size();
+		// determine amount of incoming and outgoing edges of places directed
+		// connected into transitions
+
+		Place placePredA = (Place) a.getGraph().getInEdges(a).iterator().next().getSource();
+		Place placeSuccA = (Place) a.getGraph().getOutEdges(a).iterator().next().getTarget();
+
+		Place placePredB = (Place) b.getGraph().getInEdges(b).iterator().next().getSource();
+		Place placeSuccB = (Place) b.getGraph().getOutEdges(b).iterator().next().getTarget();
+
+		int predA = placePredA.getGraph().getInEdges(placePredA) == null ? 0 : placePredA.getGraph().getInEdges(placePredA).size();
+		int succA = placeSuccA.getGraph().getOutEdges(placeSuccA) == null ? 0 : placeSuccA.getGraph().getOutEdges(placeSuccA).size();
+
+		int predB = placePredB.getGraph().getInEdges(placePredB) == null ? 0 : placePredB.getGraph().getInEdges(placePredB).size();
+		int succB = placeSuccB.getGraph().getOutEdges(placeSuccB) == null ? 0 : placeSuccB.getGraph().getOutEdges(placeSuccB).size();
 
 		boolean[] rolesA = new boolean[5];
 		boolean[] rolesB = new boolean[5];
