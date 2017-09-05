@@ -1,17 +1,13 @@
 package pucpr.meincheim.master.quality;
 
-import java.io.IOException;
 import java.util.Set;
 
 import javax.swing.JComponent;
-import javax.xml.transform.TransformerException;
 
-import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.deckfour.xes.model.XLog;
 import org.junit.Test;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetFactory;
-import org.processmining.contexts.uitopia.UIContext;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
@@ -23,14 +19,12 @@ import org.processmining.plugins.InductiveMiner.efficienttree.EfficientTree;
 import org.processmining.plugins.astar.petrinet.PetrinetReplayerWithILP;
 import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMapping;
 import org.processmining.plugins.kutoolbox.utils.PetrinetUtils;
-import org.processmining.plugins.petrinet.PetriNetVisualization;
 import org.processmining.plugins.petrinet.replayer.PNLogReplayer;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayAlgorithm;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParamProvider;
 import org.processmining.plugins.petrinet.replayer.algorithms.IPNReplayParameter;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppNaiveAlg;
 import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParam;
-import org.processmining.plugins.petrinet.replayer.algorithms.behavapp.BehavAppParamProvider;
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGen;
 import org.processmining.plugins.pnalignanalysis.conformance.AlignmentPrecGenRes;
@@ -51,35 +45,8 @@ import gnu.trove.set.hash.THashSet;
 import nl.tue.astar.AStarException;
 import pucpr.meincheim.master.base.BaseTest;
 import pucpr.meincheim.master.miner.InductiveMiner;
-import pucpr.meincheim.master.util.JComponentVisualizationUtils;
 
 public class QualityEvaluatorTest extends BaseTest {
-
-	// @Test
-	public void qualityModelTest()
-			throws IOException, TransformerException, ConnectionCannotBeObtained, AStarException {
-		AyraQualityEvaluator qe = new AyraQualityEvaluator(context, logmodel1, model1);
-
-		ModelQuality modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, logmodel0, model0);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, logmodel2, model2);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, hospitalLogCluster0, hospitalmodelCluster0);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-	}
 
 	// @Test
 	public void test() throws ConnectionCannotBeObtained, AStarException {

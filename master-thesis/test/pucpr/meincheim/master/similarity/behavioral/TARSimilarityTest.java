@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import pucpr.meincheim.master.base.BaseTest;
-import pucpr.meincheim.master.similarity.behavioral.TARSimilarity;
 
 public class TARSimilarityTest extends BaseTest {
 
