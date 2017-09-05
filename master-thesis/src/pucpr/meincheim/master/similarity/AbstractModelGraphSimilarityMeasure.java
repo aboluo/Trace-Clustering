@@ -122,12 +122,12 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		return matchEdges;
 	}
 
-	private boolean isModelSource(Collection<PetrinetEdge<?, ?>> edgesInVertexA,
+	protected boolean isModelSource(Collection<PetrinetEdge<?, ?>> edgesInVertexA,
 			Collection<PetrinetEdge<?, ?>> edgesInVertexB) {
 		return edgesInVertexA.size() == 0 && edgesInVertexB.size() == 0;
 	}
 
-	private boolean isModelEnd(Collection<PetrinetEdge<?, ?>> edgesOutVertexA,
+	protected boolean isModelEnd(Collection<PetrinetEdge<?, ?>> edgesOutVertexA,
 			Collection<PetrinetEdge<?, ?>> edgesOutVertexB) {
 		return edgesOutVertexA.size() == 0 && edgesOutVertexB.size() == 0;
 	}

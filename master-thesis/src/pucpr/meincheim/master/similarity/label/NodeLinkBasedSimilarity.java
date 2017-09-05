@@ -1,11 +1,15 @@
 package pucpr.meincheim.master.similarity.label;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
+import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 
 import pucpr.meincheim.master.similarity.AbstractModelGraphSimilarityMeasure;
 import pucpr.meincheim.master.similarity.LevenshteinNodeSimilarity;
@@ -33,8 +37,8 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * @author Alex Meincheim
  * 
- *         Implementation based on Michael Becker.
- *         Customized for ProM 6 and Petri net models
+ *         Implementation based on Michael Becker. Customized for ProM 6 and
+ *         Petri net models
  */
 
 // TODO: Rever questão dos nodes
@@ -61,11 +65,6 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 				modelB, nodeSimilaritiesAB);
 		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesBA = calculateMaxNodeSimilarities(modelB,
 				modelA, nodeSimilaritiesBA);
-
-		Map<PetrinetNode, Map<PetrinetNode, Double>> maxPlaceSimilaritiesAB = calculatePlaceSimilarities(modelA, modelB,
-				nodeSimilaritiesAB);
-		Map<PetrinetNode, Map<PetrinetNode, Double>> maxPlaceSimilaritiesBA = calculatePlaceSimilarities(modelB, modelA,
-				nodeSimilaritiesBA);
 
 		Map<PetrinetEdge, Map<PetrinetEdge, Double>> maxEdgeSimilaritiesAB = calculateMaxEdgeSimilarities(modelA,
 				modelB, nodeSimilaritiesAB);
@@ -119,83 +118,79 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		return edgeWeights;
 	}
 
-	private Map<PetrinetEdge, Map<PetrinetEdge, Double>> calculateMaxEdgeSimilarities(PetrinetGraph a, PetrinetGraph b,
+	private Map<Arc, Map<Arc, Double>> calculateMaxEdgeSimilarities(PetrinetGraph a, PetrinetGraph b,
 			Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
 
-		Map<PetrinetEdge, Map<PetrinetEdge, Double>> edgeSimilarities = new HashMap<PetrinetEdge, Map<PetrinetEdge, Double>>();
-		Map<PetrinetEdge, Map<PetrinetEdge, Double>> maxEdgeSimilarities = new HashMap<PetrinetEdge, Map<PetrinetEdge, Double>>();
+		Map<Arc, Map<Arc, Double>> edgeSimilarities = new HashMap<Arc, Map<Arc, Double>>();
+		Map<Arc, Map<Arc, Double>> maxEdgeSimilarities = new HashMap<Arc, Map<Arc, Double>>();
 
-		for (Object edgeObjectA : a.getEdges()) {
-			PetrinetEdge edgeA = (PetrinetEdge) edgeObjectA;
+		for (Place placeA : getEdgePlaces(a)) {
+			for (Place placeB : getEdgePlaces(b)) {
 
-			double maxSim = 0;
-			PetrinetEdge mappedEdge = null;
-			Map<PetrinetEdge, Double> similaritiesA = new HashMap<PetrinetEdge, Double>();
+				for (Object objectInA : a.getGraph().getInEdges(placeA)) {
+					Arc edgeInA = (Arc) objectInA;
 
-			for (Object edgeObjectB : b.getEdges()) {
-				PetrinetEdge edgeB = (PetrinetEdge) edgeObjectB;
+					double maxSim = 0;
+					Arc mappedEdge = null;
+					Map<Arc, Double> similaritiesA = new HashMap<Arc, Double>();
 
-				double simSrc = nodeSimilarities.get(edgeA.getSource()).get(edgeB.getSource());
-				
-				double simDest = nodeSimilarities.get(edgeA.getTarget()).get(edgeB.getTarget());
-				
-				double simEdge = (simSrc + simDest) / 2.0;
+					for (Object objectInB : a.getGraph().getInEdges(placeB)) {
+						Arc edgeInB = (Arc) objectInB;
 
-				similaritiesA.put(edgeB, simEdge);
+						double simSrc = nodeSimilarities.get(edgeInA.getSource()).get(edgeInB.getSource());
 
-				if (simEdge > maxSim) {
-					maxSim = simEdge;
-					mappedEdge = edgeB;
+						for (Object objectOutA : a.getGraph().getOutEdges(placeA)) {
+							Arc edgeOutA = (Arc) objectOutA;
+
+							for (Object objectOutB : a.getGraph().getOutEdges(placeB)) {
+								Arc edgeOutB = (Arc) objectOutB;
+
+								double simDest = nodeSimilarities.get(edgeOutA.getTarget()).get(edgeOutB.getTarget());
+								double simEdge = (simSrc + simDest) / 2.0;
+
+								Arc edgeA = new Arc(edgeInA.getSource(), edgeOutA.getTarget(), 1);
+								Arc edgeB = new Arc(edgeInB.getSource(), edgeOutB.getTarget(), 1);
+
+								similaritiesA.put(edgeB, simEdge);
+
+								if (simEdge > maxSim) {
+									maxSim = simEdge;
+									mappedEdge = edgeB;
+								}
+
+								edgeSimilarities.put(edgeA, similaritiesA);
+
+								if (null != mappedEdge) {
+									Map<Arc, Double> maxEdgeSimilarity = new HashMap<Arc, Double>();
+									maxEdgeSimilarity.put(mappedEdge, maxSim);
+									maxEdgeSimilarities.put(edgeA, maxEdgeSimilarity);
+								}
+							}
+						}
+					}
 				}
-			}
-			edgeSimilarities.put(edgeA, similaritiesA);
-
-			if (null != mappedEdge) {
-				Map<PetrinetEdge, Double> maxEdgeSimilarity = new HashMap<PetrinetEdge, Double>();
-				maxEdgeSimilarity.put(mappedEdge, maxSim);
-				maxEdgeSimilarities.put(edgeA, maxEdgeSimilarity);
 			}
 		}
 
 		return maxEdgeSimilarities;
 	}
 
-	// TODO: Rever
-	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculatePlaceSimilarities(PetrinetGraph a, PetrinetGraph b,
-			Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
-		
-		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilarities = new HashMap<PetrinetNode, Map<PetrinetNode, Double>>();
-
-		for (PetrinetNode vertexA : a.getPlaces()) {
-			PetrinetNode mappedVertex = null;
-
-			Map<PetrinetNode, Double> similaritiesA = new HashMap<PetrinetNode, Double>();
-
-			for (PetrinetNode vertexB : b.getPlaces()) {
-				boolean matchInEdges = checkMatchInEdges(a, b, vertexA, vertexB);
-				double simAB = 0;
-
-				if (matchInEdges) {
-					boolean matchOutEdges = checkMatchOutEdges(a, b, vertexA, vertexB);
-
-					if (matchOutEdges) {
-						mappedVertex = vertexB;
-						simAB = 1.0;
-					}
-				}
-
-				similaritiesA.put(vertexB, simAB);
-			}
-
-			nodeSimilarities.put(vertexA, similaritiesA);
-			if (mappedVertex != null) {
-				Map<PetrinetNode, Double> maxNodeSimilarity = new HashMap<PetrinetNode, Double>();
-				maxNodeSimilarity.put(mappedVertex, 1.0);
-				maxNodeSimilarities.put(vertexA, maxNodeSimilarity);
+	private Set<Place> getEdgePlaces(PetrinetGraph a) {
+		Set<Place> places = new HashSet<Place>();
+		for (Place place : a.getPlaces()) {
+			if (!isSourceModel(place) && !isEndModel(place)) {
+				places.add(place);
 			}
 		}
+		return places;
+	}
 
-		return maxNodeSimilarities;
+	private boolean isSourceModel(PetrinetNode node) {
+		return node.getGraph().getInEdges(node).size() == 0;
+	}
+
+	private boolean isEndModel(PetrinetNode node) {
+		return node.getGraph().getOutEdges(node).size() == 0;
 	}
 
 	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculateMaxNodeSimilarities(PetrinetGraph a, PetrinetGraph b,
