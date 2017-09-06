@@ -18,6 +18,7 @@ import pucpr.meincheim.master.miner.InductiveMiner;
 import pucpr.meincheim.master.miner.Miner;
 import pucpr.meincheim.master.quality.FinalQualityEvaluator;
 import pucpr.meincheim.master.quality.ModelQuality;
+import pucpr.meincheim.master.quality.PPCProcessTreeQualityEvaluator;
 import pucpr.meincheim.master.quality.QualityEvaluator;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
 import pucpr.meincheim.master.similarity.behavioral.DependencyGraphComparisonSimilarity;
@@ -27,7 +28,7 @@ import pucpr.meincheim.master.similarity.label.CommonNodesEdgesSimilarity;
 import pucpr.meincheim.master.similarity.label.FeatureBasedSimilarity;
 import pucpr.meincheim.master.similarity.structural.GraphEditDistanceSimilarity;
 import pucpr.meincheim.master.similarity.structural.LaRosaSimilarity;
-import pucpr.meincheim.master.util.CsvWriter;
+import pucpr.meincheim.master.util.CsvUtils;
 import pucpr.meincheim.master.util.LogUtils;
 
 public class ExperimentLoader {
@@ -52,7 +53,7 @@ public class ExperimentLoader {
 		PluginManagerImpl.getInstance();
 		this.miner = new InductiveMiner();
 
-		this.qualityEvaluator = new FinalQualityEvaluator(context, (InductiveMiner) miner);
+		this.qualityEvaluator = new PPCProcessTreeQualityEvaluator(context, (InductiveMiner) miner);
 		this.similaritiesMeasures = new ArrayList<SimilarityMeasure<?>>();
 
 		// Label
@@ -112,7 +113,7 @@ public class ExperimentLoader {
 	private String buildFolderExporter(String simName, String fileName, boolean recalculateCentroid,
 			double simThresold) {
 		return experimentPathBase + "\\"
-				+ String.format("%s %s %s %s", fileName, simName, simThresold, recalculateCentroid);
+				+ String.format("%s;%s;%s;%s", fileName, simName, simThresold, recalculateCentroid);
 	}
 
 	private void evaluateClusterQuality(String logsDirectory) {
@@ -122,8 +123,8 @@ public class ExperimentLoader {
 			qualityEvaluator.loadMapping(log);
 			qualities.add(qualityEvaluator.calculate());
 		}
-		CsvWriter csv = new CsvWriter();
-		csv.qualityExportCsv(qualities, logsDirectory + ".csv");
+		CsvUtils csv = new CsvUtils();
+		csv.qualityExportCsv(qualities, logsDirectory);
 	}
 
 	private void exportLogs(List<Cluster> clusters, String folderExporter) throws FileNotFoundException, IOException {
