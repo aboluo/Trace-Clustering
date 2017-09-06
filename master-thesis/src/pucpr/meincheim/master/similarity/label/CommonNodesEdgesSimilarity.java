@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 
 import pucpr.meincheim.master.similarity.AbstractModelGraphSimilarityMeasure;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
@@ -22,38 +22,42 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * TODO: allow for comparison based on connector types, too
  * 
- * @author Alex Meincheim 
+ * @author Alex Meincheim
  * 
- * Implementation based on Michael Becker.
+ *         Implementation based on Michael Becker.
  * 
- * Customized for ProM 6 and Petri net models
+ *         Customized for ProM 6 and Petri net models
  */
 public class CommonNodesEdgesSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetGraph> {
 
-	public double calculateSimilarity(PetrinetGraph aGraph, PetrinetGraph bGraph)  {
+	public double calculateSimilarity(PetrinetGraph aGraph, PetrinetGraph bGraph) {
 
 		Map<PetrinetNode, PetrinetNode> mappingsAB = getMapping(aGraph, bGraph);
 		Map<PetrinetNode, PetrinetNode> mappingsBA = getMapping(bGraph, aGraph);
-		
-		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
-		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
 
-		// create the set of vertices contained only in one model based on the mapping
-		Set<PetrinetNode> verticesOnlyInA = new HashSet<PetrinetNode>(getLabeledElements(aGraph,true,true));
-		Set<PetrinetNode> verticesOnlyInB = new HashSet<PetrinetNode>(getLabeledElements(bGraph,true,true));
-		
+		Set<PetrinetNode> transitionsModelA = getLabeledElements(aGraph, true, true);
+		Set<PetrinetNode> transitionsModelB = getLabeledElements(bGraph, true, true);
+
+		// create the set of vertices contained only in one model based on the
+		// mapping
+		Set<PetrinetNode> verticesOnlyInA = new HashSet<PetrinetNode>(transitionsModelA);
+		Set<PetrinetNode> verticesOnlyInB = new HashSet<PetrinetNode>(transitionsModelB);
+
+		Set<Arc> edgesModelA = getTransitionEdges(transitionsModelA);
+		Set<Arc> edgesModelB = getTransitionEdges(transitionsModelB);
+
 		verticesOnlyInA.removeAll(mappingsAB.keySet());
 		verticesOnlyInB.removeAll(mappingsBA.keySet());
-	
+
 		// search for edges within a but not in b
-		Set<PetrinetEdge> edgesOnlyInA = getEdgesOnlyInOneModel(aGraph, bGraph, mappingsAB);
-		Set<PetrinetEdge> edgesOnlyInB = getEdgesOnlyInOneModel(bGraph, aGraph, mappingsBA);
+		Set<Arc> edgesOnlyInA = getArcsOnlyInOneModel(edgesModelA, edgesModelB, mappingsAB);
+		Set<Arc> edgesOnlyInB = getArcsOnlyInOneModel(edgesModelB, edgesModelA, mappingsBA);
 
 		double distance = verticesOnlyInA.size() + verticesOnlyInB.size() + edgesOnlyInA.size() + edgesOnlyInB.size();
 
-		return 1.0 - distance / (aGraph.getNodes().size() + bGraph.getNodes().size()
-				+ aGraph.getEdges().size() + bGraph.getEdges().size());
+		return 1.0 - distance
+				/ (transitionsModelA.size() + transitionsModelB.size() + edgesModelA.size() + edgesModelB.size());
 	}
 
 }

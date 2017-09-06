@@ -48,9 +48,9 @@ public class ExperimentLoaderTest {
 	private XLog currentLog;
 
 	public ExperimentLoaderTest() {
-		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		//filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		
-		//filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		loader = new ExperimentLoader(filePathBase, true, true);		
 		datesetPathBase = filePathBase + "\\Experiment\\Dataset";
 		

@@ -13,6 +13,7 @@ import org.processmining.framework.models.ModelGraphVertex;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 public abstract class AbstractModelGraphSimilarityMeasure {
@@ -132,6 +133,18 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 		return edgesOutVertexA.size() == 0 && edgesOutVertexB.size() == 0;
 	}
 
+	protected Set<Arc> getTransitionEdges(Set<PetrinetNode> modelTransitions) {
+		Set<Arc> edges = new HashSet<Arc>();
+		for (PetrinetNode node : modelTransitions) {
+			Transition source = (Transition) node;
+			for (Transition target : source.getVisibleSuccessors()) {
+				Arc arc = new Arc(source, target, 1);
+				edges.add(arc);
+			}
+		}
+		return edges;
+	}
+
 	/**
 	 * Returns the set of edges that are only contained in model a but not in
 	 * model b.
@@ -173,6 +186,39 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 
 				if (!found && !isInvisibleTransition((PetrinetNode) edgeA.getSource())
 						&& !isInvisibleTransition((PetrinetNode) edgeA.getTarget())) {
+					edgesOnlyInOneModel.add(edgeA);
+				}
+			}
+		}
+
+		return edgesOnlyInOneModel;
+	}
+
+	protected Set<Arc> getArcsOnlyInOneModel(Set<Arc> arcsModela, Set<Arc> arcsModelB,
+			Map<PetrinetNode, PetrinetNode> mappingsAB) {
+
+		Set<Arc> edgesOnlyInOneModel = new HashSet<Arc>();
+
+		// search for edges within a but not in b
+		for (Arc edgeA : arcsModela) {
+
+			PetrinetNode source = (PetrinetNode) edgeA.getSource();
+			PetrinetNode dest = (PetrinetNode) edgeA.getTarget();
+
+			PetrinetNode mappedSource = mappingsAB.get(source);
+			PetrinetNode mappedDest = mappingsAB.get(dest);
+
+			if (mappedSource != null || mappedDest != null) {
+				boolean found = false;
+
+				for (Arc edgeB : arcsModelB) {
+					if (edgeB.getSource().equals(mappedSource) && edgeB.getTarget().equals(mappedDest)) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
 					edgesOnlyInOneModel.add(edgeA);
 				}
 			}
@@ -461,21 +507,22 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 	// return nodes;
 	// }
 
-	//	protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes, PetrinetNode actual,
-	//			boolean considerOnlyVisible) {
+	// protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes,
+	// PetrinetNode actual,
+	// boolean considerOnlyVisible) {
 	//
-	//		for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
-	//			PetrinetNode target = (PetrinetNode) edge.getTarget();
+	// for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
+	// PetrinetNode target = (PetrinetNode) edge.getTarget();
 	//
-	//			if (target instanceof Transition) {
-	//				nodes.add(target);
-	//			} else {
-	//				if (target.getGraph().getOutEdges(target).size() > 0)
-	//					getNextTransitions(nodes, target, considerOnlyVisible);
-	//			}
-	//		}
-	//		return nodes;
-	//	}
+	// if (target instanceof Transition) {
+	// nodes.add(target);
+	// } else {
+	// if (target.getGraph().getOutEdges(target).size() > 0)
+	// getNextTransitions(nodes, target, considerOnlyVisible);
+	// }
+	// }
+	// return nodes;
+	// }
 
 	/**
 	 * Returns the transitive closure of the predecessors of a given vertex

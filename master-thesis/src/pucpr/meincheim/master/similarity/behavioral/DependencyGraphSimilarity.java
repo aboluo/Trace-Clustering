@@ -7,6 +7,7 @@ import java.util.Set;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 
 import pucpr.meincheim.master.similarity.AbstractModelGraphSimilarityMeasure;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
@@ -46,10 +47,13 @@ public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasu
 		Set<String> elementNamesA = new HashSet<String>();
 		Set<String> elementNamesB = new HashSet<String>();
 
-		for (PetrinetNode vertex : getLabeledElements(aGraph, true, true)) {
+		Set<PetrinetNode> transitionsModelA = getLabeledElements(aGraph, true, true);
+		Set<PetrinetNode> transitionsModelB = getLabeledElements(bGraph, true, true);
+
+		for (PetrinetNode vertex : transitionsModelA) {
 			elementNamesA.add(vertex.getLabel());
 		}
-		for (PetrinetNode vertex : getLabeledElements(bGraph, true, true)) {
+		for (PetrinetNode vertex : transitionsModelB) {
 			elementNamesB.add(vertex.getLabel());
 		}
 
@@ -67,12 +71,12 @@ public class DependencyGraphSimilarity extends AbstractModelGraphSimilarityMeasu
 		Map<PetrinetNode, PetrinetNode> mappingsAB = getMapping(aGraph, bGraph);
 		Map<PetrinetNode, PetrinetNode> mappingsBA = getMapping(bGraph, aGraph);
 
-		mappingsAB.putAll(getPlacesMapping(aGraph, bGraph));
-		mappingsBA.putAll(getPlacesMapping(bGraph, aGraph));
-
-		Set<PetrinetEdge> edgesOnlyInA = getEdgesOnlyInOneModel(aGraph, bGraph, mappingsAB);
-		Set<PetrinetEdge> edgesOnlyInB = getEdgesOnlyInOneModel(bGraph, aGraph, mappingsBA);
-
+		Set<Arc> edgesModelA = getTransitionEdges(transitionsModelA);
+		Set<Arc> edgesModelB = getTransitionEdges(transitionsModelB);
+	
+		Set<Arc> edgesOnlyInA = getArcsOnlyInOneModel(edgesModelA, edgesModelB, mappingsAB);
+		Set<Arc> edgesOnlyInB = getArcsOnlyInOneModel(edgesModelB, edgesModelA, mappingsBA);
+		
 		return 1.0 / (1.0 + edgesOnlyInA.size() + edgesOnlyInB.size());
 	}
 }

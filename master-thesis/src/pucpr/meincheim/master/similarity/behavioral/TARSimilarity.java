@@ -3,7 +3,6 @@ package pucpr.meincheim.master.similarity.behavioral;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;

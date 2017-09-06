@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.processmining.models.graphbased.directed.petrinet.PetrinetGraph;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
+import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 import pucpr.meincheim.master.similarity.AbstractModelGraphSimilarityMeasure;
 import pucpr.meincheim.master.similarity.LevenshteinNodeSimilarity;
@@ -19,8 +20,8 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * The similarity is calculated using the following features
  * <ul>
- * <li>Label Feature: String Edit Distance Similarity between element
- * labels</li>
+ * <li>Label Feature: String Edit Distance Similarity between element labels
+ * </li>
  * <li>Role Feature: Similarity based on the role of element (start, stop,
  * split, join, regular (sequential elements)</li>
  * </ul>
@@ -42,14 +43,14 @@ public class FeatureBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 
 	protected static final SimilarityMeasure<PetrinetNode> DEFAULT_LABEL_SIM = new LevenshteinNodeSimilarity();
 
-	public static final SimilarityMeasure<PetrinetNode> DEFAULT_ROLE_SIM = new RoleFeatureSimilarity();
+	public static final SimilarityMeasure<Transition> DEFAULT_ROLE_SIM = new RoleFeatureSimilarity();
 
 	public static final double DEFAULT_LCUTOFF_HIGH = 0.8;
 	public static final double DEFAULT_RCUTOFF = 1.0;
 	public static final double DEFAULT_LCUTOFF_MED = 0.2;
 
 	protected SimilarityMeasure<PetrinetNode> labelFeatureSimilarity;
-	protected SimilarityMeasure<PetrinetNode> roleFeatureSimilarity;
+	protected SimilarityMeasure<Transition> roleFeatureSimilarity;
 
 	protected double lCutoffHigh;
 	protected double rCutoff;
@@ -60,7 +61,7 @@ public class FeatureBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 	}
 
 	public FeatureBasedSimilarity(SimilarityMeasure<PetrinetNode> labelFeatureSimilarity,
-			SimilarityMeasure<PetrinetNode> roleFeatureSimilarity, double lCutoffHigh, double rCutoff,
+			SimilarityMeasure<Transition> roleFeatureSimilarity, double lCutoffHigh, double rCutoff,
 			double lCutoffMed) {
 		this.labelFeatureSimilarity = labelFeatureSimilarity;
 		this.roleFeatureSimilarity = roleFeatureSimilarity;
@@ -74,14 +75,16 @@ public class FeatureBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 
 		Map<PetrinetNode, Set<PetrinetNode>> matches = new HashMap<PetrinetNode, Set<PetrinetNode>>();
 
-		for (PetrinetNode vertexA : getLabeledElements(a, true, true)) {
+		Set<PetrinetNode> transitionsModelA = getLabeledElements(a, true, true);
+		Set<PetrinetNode> transitionsModelB = getLabeledElements(b, true, true);
+
+		for (PetrinetNode vertexA : transitionsModelA) {
 			Set<PetrinetNode> matchesA = new HashSet<PetrinetNode>();
 			boolean hasMatch = false;
 
-			for (PetrinetNode vertexB : getLabeledElements(b, true, true)) {
-				double lsimAB = labelFeatureSimilarity.calculateSimilarity(vertexA,
-						vertexB);
-				double rsimAB = roleFeatureSimilarity.calculateSimilarity(vertexA, vertexB);
+			for (PetrinetNode vertexB : transitionsModelB) {
+				double lsimAB = labelFeatureSimilarity.calculateSimilarity(vertexA, vertexB);
+				double rsimAB = roleFeatureSimilarity.calculateSimilarity((Transition) vertexA, (Transition) vertexB);
 
 				// two nodes are matched, if their labels are similar to a high
 				// degree or if their role and label are similar to a medium
@@ -99,7 +102,7 @@ public class FeatureBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 
 		int matchedInA = matches.keySet().size();
 		int matchedInB = matches.values().size();
-		int total = getLabeledElements(a, true, true).size() + getLabeledElements(b, true, true).size();
+		int total = transitionsModelA.size() + transitionsModelB.size();
 
 		return (double) (matchedInA + matchedInB) / (double) total;
 	}

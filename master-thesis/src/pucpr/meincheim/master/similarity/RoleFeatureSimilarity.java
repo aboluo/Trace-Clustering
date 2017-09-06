@@ -2,6 +2,7 @@ package pucpr.meincheim.master.similarity;
 
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
+import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 /**
  * Similarity of two process graph nodes according to Yan et al.: Fast Business
@@ -35,23 +36,16 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
  * 
  */
 public class RoleFeatureSimilarity extends AbstractModelGraphSimilarityMeasure
-		implements SimilarityMeasure<PetrinetNode> {
+		implements SimilarityMeasure<Transition> {
 
-	public double calculateSimilarity(PetrinetNode a, PetrinetNode b) {
+	public double calculateSimilarity(Transition a, Transition b) {
 		// determine amount of incoming and outgoing edges of places directed
 		// connected into transitions
 
-		Place placePredA = (Place) a.getGraph().getInEdges(a).iterator().next().getSource();
-		Place placeSuccA = (Place) a.getGraph().getOutEdges(a).iterator().next().getTarget();
-
-		Place placePredB = (Place) b.getGraph().getInEdges(b).iterator().next().getSource();
-		Place placeSuccB = (Place) b.getGraph().getOutEdges(b).iterator().next().getTarget();
-
-		int predA = placePredA.getGraph().getInEdges(placePredA) == null ? 0 : placePredA.getGraph().getInEdges(placePredA).size();
-		int succA = placeSuccA.getGraph().getOutEdges(placeSuccA) == null ? 0 : placeSuccA.getGraph().getOutEdges(placeSuccA).size();
-
-		int predB = placePredB.getGraph().getInEdges(placePredB) == null ? 0 : placePredB.getGraph().getInEdges(placePredB).size();
-		int succB = placeSuccB.getGraph().getOutEdges(placeSuccB) == null ? 0 : placeSuccB.getGraph().getOutEdges(placeSuccB).size();
+		int predA = a.getVisiblePredecessors().size();
+		int succA = a.getVisibleSuccessors().size();
+		int predB = b.getVisiblePredecessors().size();
+		int succB = b.getVisibleSuccessors().size();
 
 		boolean[] rolesA = new boolean[5];
 		boolean[] rolesB = new boolean[5];

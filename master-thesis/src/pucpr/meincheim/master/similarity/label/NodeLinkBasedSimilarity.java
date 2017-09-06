@@ -103,19 +103,8 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		Map<Arc, Double> edgeWeights = new HashMap<Arc, Double>();
 
 		for (Arc edge : edgesModel) {
-			// PetrinetEdge edge = (PetrinetEdge) edgeObject;
-			// if ((null != edge.getStyle()) && edge.getStyle().equals("X")) {
-			// int cases;
-			// if (1 < edge.getSource().getOutEdges().size()) {
-			// cases = edge.getSource().getOutEdges().size();
-			// } else {
-			// cases = edge.getDest().getInEdges().size();
-			// }
-			//
-			// edgeWeights.put(edge, 1.0 / cases);
-			// } else {
-			edgeWeights.put(edge, 1.0);
-			// }
+			Transition source = (Transition) edge.getSource();
+			edgeWeights.put(edge, 1.0 / source.getVisibleSuccessors().size());
 		}
 
 		return edgeWeights;
@@ -159,18 +148,6 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		}
 
 		return maxEdgeSimilarities;
-	}
-
-	private Set<Arc> getTransitionEdges(Set<PetrinetNode> modelTransitions) {
-		Set<Arc> edges = new HashSet<Arc>();
-		for (PetrinetNode node : modelTransitions) {
-			Transition source = (Transition) node;
-			for (Transition target : source.getVisibleSuccessors()) {
-				Arc arc = new Arc(source, target, 1);
-				edges.add(arc);
-			}
-		}
-		return edges;
 	}
 
 	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculateMaxNodeSimilarities(

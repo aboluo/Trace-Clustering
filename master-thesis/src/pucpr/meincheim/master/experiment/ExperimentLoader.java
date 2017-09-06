@@ -53,7 +53,7 @@ public class ExperimentLoader {
 		PluginManagerImpl.getInstance();
 		this.miner = new InductiveMiner();
 
-		this.qualityEvaluator = new PPCProcessTreeQualityEvaluator(context, (InductiveMiner) miner);
+		this.qualityEvaluator = new FinalQualityEvaluator(context, (InductiveMiner) miner);
 		this.similaritiesMeasures = new ArrayList<SimilarityMeasure<?>>();
 
 		// Label
