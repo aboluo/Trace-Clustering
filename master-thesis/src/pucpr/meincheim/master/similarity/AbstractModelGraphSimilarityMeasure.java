@@ -461,21 +461,21 @@ public abstract class AbstractModelGraphSimilarityMeasure {
 	// return nodes;
 	// }
 
-	protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes, PetrinetNode actual,
-			boolean considerOnlyVisible) {
-
-		for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
-			PetrinetNode target = (PetrinetNode) edge.getTarget();
-
-			if (target instanceof Transition) {
-				nodes.add(target);
-			} else {
-				if (target.getGraph().getOutEdges(target).size() > 0)
-					getNextTransitions(nodes, target, considerOnlyVisible);
-			}
-		}
-		return nodes;
-	}
+	//	protected Set<PetrinetNode> getNextTransitions(Set<PetrinetNode> nodes, PetrinetNode actual,
+	//			boolean considerOnlyVisible) {
+	//
+	//		for (PetrinetEdge edge : actual.getGraph().getOutEdges(actual)) {
+	//			PetrinetNode target = (PetrinetNode) edge.getTarget();
+	//
+	//			if (target instanceof Transition) {
+	//				nodes.add(target);
+	//			} else {
+	//				if (target.getGraph().getOutEdges(target).size() > 0)
+	//					getNextTransitions(nodes, target, considerOnlyVisible);
+	//			}
+	//		}
+	//		return nodes;
+	//	}
 
 	/**
 	 * Returns the transitive closure of the predecessors of a given vertex

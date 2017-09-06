@@ -30,7 +30,7 @@ import pucpr.meincheim.master.similarity.label.FeatureBasedSimilarity;
 import pucpr.meincheim.master.similarity.label.NodeLinkBasedSimilarity;
 import pucpr.meincheim.master.similarity.structural.GraphEditDistanceSimilarity;
 import pucpr.meincheim.master.similarity.structural.LaRosaSimilarity;
-import pucpr.meincheim.master.util.CsvWriter;
+import pucpr.meincheim.master.util.CsvUtils;
 import pucpr.meincheim.master.util.LogUtils;
 
 public class ExperimentLoaderTest {
@@ -48,11 +48,12 @@ public class ExperimentLoaderTest {
 	private XLog currentLog;
 
 	public ExperimentLoaderTest() {
-		// filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática -
-		// PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		
-		filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
-		loader = new ExperimentLoader(filePathBase, false, true);
+		//filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
+		loader = new ExperimentLoader(filePathBase, true, true);		
+		datesetPathBase = filePathBase + "\\Experiment\\Dataset";
+		
 		currentFile = new File(datesetPathBase + "\\01Hospital_log.xes");
 		currentLog = LogUtils.loadByFile(currentFile);
 	}
@@ -72,7 +73,7 @@ public class ExperimentLoaderTest {
 		loader.load(currentFile, currentLog, new FeatureBasedSimilarity());
 	}
 
-	// @Test
+	@Test
 	public void NodeLinkBasedSimilarity() {
 		loader.load(currentFile, currentLog, new NodeLinkBasedSimilarity());
 	}
