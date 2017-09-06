@@ -56,32 +56,6 @@ import pucpr.meincheim.master.util.JComponentVisualizationUtils;
 public class QualityEvaluatorTest extends BaseTest {
 
 	// @Test
-	public void qualityModelTest()
-			throws IOException, TransformerException, ConnectionCannotBeObtained, AStarException {
-		AyraQualityEvaluator qe = new AyraQualityEvaluator(context, logmodel1, model1);
-
-		ModelQuality modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, logmodel0, model0);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, logmodel2, model2);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-		qe = new AyraQualityEvaluator(context, hospitalLogCluster0, hospitalmodelCluster0);
-		modelQuality = qe.calculate();
-		System.out.println("Recall " + modelQuality.getRecall());
-		System.out.println("Precision " + modelQuality.getPrecision());
-
-	}
-
-	// @Test
 	public void test() throws ConnectionCannotBeObtained, AStarException {
 		replayCalc(hospitalLogCluster0, hospitalmodelCluster0, new PNLogReplayer(), new PetrinetReplayerWithILP());
 		precCalc(hospitalLogCluster0, hospitalmodelCluster0);
