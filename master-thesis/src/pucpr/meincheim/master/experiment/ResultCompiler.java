@@ -18,8 +18,8 @@ public class ResultCompiler {
 
 		// Complete
 		compileFile(resultsDirectory, "", "Precision");
-		compileFile(resultsDirectory, "", "Precision");
-		compileFile(resultsDirectory, "", "Precision");
+//		compileFile(resultsDirectory, "", "Precision");
+//		compileFile(resultsDirectory, "", "Precision");
 
 		// By Thresholds
 		compileFile(resultsDirectory, "0.4", "Precision");

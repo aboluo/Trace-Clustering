@@ -7,7 +7,16 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.processmining.contexts.uitopia.UIContext;
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.plugins.petrinet.PetriNetVisualization;
+
 public class JComponentVisualizationUtils {
+	
+	public static void visualize(Petrinet model) {
+		visualize(new PetriNetVisualization().visualize(new UIContext().getMainPluginContext(), model));
+	}
 	
 	public static void visualize(JComponent component) {
 		JFrame jFrame = new JFrame();
