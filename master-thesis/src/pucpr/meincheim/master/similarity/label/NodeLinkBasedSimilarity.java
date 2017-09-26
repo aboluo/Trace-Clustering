@@ -16,33 +16,18 @@ import pucpr.meincheim.master.similarity.LevenshteinNodeSimilarity;
 import pucpr.meincheim.master.similarity.SimilarityMeasure;
 
 /**
- * Similarity between process models according to Huang et al.: An algorithm for
- * calculating process similarity to cluster open-source process designs.
- * 
- * In the first iteration, similarity between nodes is establish based on
- * similarity between web services. In our implementation we use
- * {@link LevenshteinVertexSimilarity} as a default. However, every other vertex
- * based similarity measure can be used, too. Based on this, similarity between
- * two edges (A1,A2) and (B1,B2) is calculated as follows:
- * <code>sim((A1,A2),(B1,B2)) = (sim(A1,A2) + sim(B1,B2))/2</code>.
- * 
- * Overall similarity between nodes of a model M0 and nodes of a model M1 is
- * calculated by summing up the individual node similarities and dividing this
- * sum by the overall amount of nodes in both process models. To calculate
- * similarity between edges, edges are assigned with weights. In our
- * implementation, we give an XOR-edge a weight of 1/n where n is the amount of
- * outgoing nodes. All over weights are left untouched, since the paper of Huang
- * et al. does not concretise the approach.
- * 
- * 
- * @author Alex Meincheim
- * 
- *         Implementation based on Michael Becker. Customized for ProM 6 and
- *         Petri net models
+ * Similarity between process models according to Huang et al.: An algorithm for calculating process similarity to cluster open-source
+ * process designs. In the first iteration, similarity between nodes is establish based on similarity between web services. In our
+ * implementation we use {@link LevenshteinVertexSimilarity} as a default. However, every other vertex based similarity measure can be used,
+ * too. Based on this, similarity between two edges (A1,A2) and (B1,B2) is calculated as follows:
+ * <code>sim((A1,A2),(B1,B2)) = (sim(A1,A2) + sim(B1,B2))/2</code>. Overall similarity between nodes of a model M0 and nodes of a model M1
+ * is calculated by summing up the individual node similarities and dividing this sum by the overall amount of nodes in both process models.
+ * To calculate similarity between edges, edges are assigned with weights. In our implementation, we give an XOR-edge a weight of 1/n where
+ * n is the amount of outgoing nodes. All over weights are left untouched, since the paper of Huang et al. does not concretise the approach.
+ * @author Alex Meincheim Implementation based on Michael Becker. Customized for ProM 6 and Petri net models
  */
 
-public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
-		implements SimilarityMeasure<PetrinetGraph> {
+public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure implements SimilarityMeasure<PetrinetGraph> {
 
 	protected static final SimilarityMeasure<PetrinetNode> DEFAULT_NODE_SIMILARITY = new LevenshteinNodeSimilarity();
 
@@ -66,15 +51,13 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		Set<Arc> edgesModelA = getTransitionEdges(transitionsModelA);
 		Set<Arc> edgesModelB = getTransitionEdges(transitionsModelB);
 
-		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesAB = calculateMaxNodeSimilarities(
-				transitionsModelA, transitionsModelB, nodeSimilaritiesAB);
-		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesBA = calculateMaxNodeSimilarities(
-				transitionsModelB, transitionsModelA, nodeSimilaritiesBA);
+		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesAB = calculateMaxNodeSimilarities(transitionsModelA,
+				transitionsModelB, nodeSimilaritiesAB);
+		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilaritiesBA = calculateMaxNodeSimilarities(transitionsModelB,
+				transitionsModelA, nodeSimilaritiesBA);
 
-		Map<Arc, Map<Arc, Double>> maxEdgeSimilaritiesAB = calculateMaxEdgeSimilarities(edgesModelA, edgesModelB,
-				nodeSimilaritiesAB);
-		Map<Arc, Map<Arc, Double>> maxEdgeSimilaritiesBA = calculateMaxEdgeSimilarities(edgesModelB, edgesModelA,
-				nodeSimilaritiesBA);
+		Map<Arc, Map<Arc, Double>> maxEdgeSimilaritiesAB = calculateMaxEdgeSimilarities(edgesModelA, edgesModelB, nodeSimilaritiesAB);
+		Map<Arc, Map<Arc, Double>> maxEdgeSimilaritiesBA = calculateMaxEdgeSimilarities(edgesModelB, edgesModelA, nodeSimilaritiesBA);
 
 		Map<Arc, Double> edgeWeightsA = calculateEdgeWeights(edgesModelA);
 		Map<Arc, Double> edgeWeightsB = calculateEdgeWeights(edgesModelB);
@@ -86,16 +69,26 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 
 		double nodeSim = simNodeSum / ((double) transitionsModelA.size() + (double) transitionsModelB.size());
 		double edgeSim = simEdgeSum / ((double) edgesModelA.size() + (double) edgesModelB.size());
+		
+//		 System.out.println(edgeWeightsA);
+//		 System.out.println(edgeWeightsB);
+//		
+//		 System.out.println(maxNodeSimilaritiesAB);
+//		 System.out.println(maxNodeSimilaritiesBA);
+//		
+//		 System.out.println(maxEdgeSimilaritiesAB);
+//		
+//		 System.out.println(simNodeSum);
+//		 System.out.println(nodeSim);
+//		 
+//		 System.out.println(simEdgeSum);
 
 		return 1.0 / 2.0 * nodeSim + 1.0 / 2.0 * edgeSim;
 	}
 
 	/**
-	 * Calculates the weight for all edges in the given model. An xor-edge (with
-	 * style "X") gets a weight of 1 / amount of outgoing cases.
-	 * 
-	 * @param model
-	 *            the model to calculate the edge weights for
+	 * Calculates the weight for all edges in the given model. An xor-edge (with style "X") gets a weight of 1 / amount of outgoing cases.
+	 * @param model the model to calculate the edge weights for
 	 * @return the weights of edges of the given model
 	 */
 	// TODO: Rever
@@ -103,8 +96,20 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		Map<Arc, Double> edgeWeights = new HashMap<Arc, Double>();
 
 		for (Arc edge : edgesModel) {
+
+			int cases = 1;
+
 			Transition source = (Transition) edge.getSource();
-			edgeWeights.put(edge, 1.0 / source.getVisibleSuccessors().size());
+			int edgeSourceVisibleSucessorsSize = source.getVisibleSuccessors().size();
+
+			if (edgeSourceVisibleSucessorsSize > 1) {
+				cases = edgeSourceVisibleSucessorsSize;
+			} else {
+				Transition target = (Transition) edge.getTarget();
+				cases = target.getVisiblePredecessors().size();
+			}
+
+			edgeWeights.put(edge, 1.0 / cases);
 		}
 
 		return edgeWeights;
@@ -150,9 +155,8 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		return maxEdgeSimilarities;
 	}
 
-	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculateMaxNodeSimilarities(
-			Set<PetrinetNode> transitionsModelA, Set<PetrinetNode> transitionsModelB,
-			Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
+	private Map<PetrinetNode, Map<PetrinetNode, Double>> calculateMaxNodeSimilarities(Set<PetrinetNode> transitionsModelA,
+			Set<PetrinetNode> transitionsModelB, Map<PetrinetNode, Map<PetrinetNode, Double>> nodeSimilarities) {
 		Map<PetrinetNode, Map<PetrinetNode, Double>> maxNodeSimilarities = new HashMap<PetrinetNode, Map<PetrinetNode, Double>>();
 
 		for (PetrinetNode vertexA : transitionsModelA) {
