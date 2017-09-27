@@ -39,7 +39,7 @@ public class RoleFeatureSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<Transition> {
 
 	public double calculateSimilarity(Transition a, Transition b) {
-		// determine amount of incoming and outgoing edges of places directed
+		// determine amount of incoming and outgoing edges of transitions directed
 		// connected into transitions
 
 		int predA = a.getVisiblePredecessors().size();

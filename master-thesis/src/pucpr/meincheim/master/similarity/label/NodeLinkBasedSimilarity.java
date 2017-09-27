@@ -70,18 +70,18 @@ public class NodeLinkBasedSimilarity extends AbstractModelGraphSimilarityMeasure
 		double nodeSim = simNodeSum / ((double) transitionsModelA.size() + (double) transitionsModelB.size());
 		double edgeSim = simEdgeSum / ((double) edgesModelA.size() + (double) edgesModelB.size());
 		
-//		 System.out.println(edgeWeightsA);
-//		 System.out.println(edgeWeightsB);
-//		
-//		 System.out.println(maxNodeSimilaritiesAB);
-//		 System.out.println(maxNodeSimilaritiesBA);
-//		
-//		 System.out.println(maxEdgeSimilaritiesAB);
-//		
-//		 System.out.println(simNodeSum);
-//		 System.out.println(nodeSim);
-//		 
-//		 System.out.println(simEdgeSum);
+		 System.out.println(edgeWeightsA);
+		 System.out.println(edgeWeightsB);
+		
+		 System.out.println(maxNodeSimilaritiesAB);
+		 System.out.println(maxNodeSimilaritiesBA);
+		
+		 System.out.println(maxEdgeSimilaritiesAB);
+		
+		 System.out.println(simNodeSum);
+		 System.out.println(nodeSim);
+		 
+		 System.out.println(simEdgeSum);
 
 		return 1.0 / 2.0 * nodeSim + 1.0 / 2.0 * edgeSim;
 	}

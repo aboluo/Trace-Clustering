@@ -68,7 +68,7 @@ public class ExperimentLoader {
 
 		this.experimentPathBase = filePathBase + "\\Experiment\\Results";
 		this.datesetPathBase = filePathBase + "\\Experiment\\Dataset";
-		
+
 		this.cluster = cluster;
 		this.evaluate = evaluate;
 	}

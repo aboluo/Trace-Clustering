@@ -41,11 +41,11 @@ import pucpr.meincheim.master.similarity.SimilarityMeasure;
  * 
  * In our implementation, we can handle EPC models with cycles
  * 
- * @author Alex Meincheim 
+ * @author Alex Meincheim
  * 
- * Implementation based on Michael Becker.
+ *         Implementation based on Michael Becker.
  * 
- * Customized for ProM 6 and Petri net models
+ *         Customized for ProM 6 and Petri net models
  */
 public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimilarityMeasure
 		implements SimilarityMeasure<PetrinetGraph> {
@@ -62,20 +62,20 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 		this.alpha = alpha;
 	}
 
-	public double calculateSimilarity(PetrinetGraph a, PetrinetGraph b) {
+	public double calculateSimilarity(PetrinetGraph modelA, PetrinetGraph modelB) {
 
-		PetrinetGraph aGraph = a;
-		PetrinetGraph bGraph = b;
+		Set<PetrinetNode> transitionsModelA = getLabeledElements(modelA, true, true);
+		Set<PetrinetNode> transitionsModelB = getLabeledElements(modelB, true, true);
 
-		Map<PetrinetNode, Double> activityVectorA = buildActivityVector(aGraph);
-		Map<PetrinetNode, Double> activityVectorB = buildActivityVector(bGraph);
+		Map<PetrinetNode, Double> activityVectorA = buildActivityVector(transitionsModelA);
+		Map<PetrinetNode, Double> activityVectorB = buildActivityVector(transitionsModelB);
 
-		Map<PetrinetNode, Map<PetrinetNode, Integer>> distanceVectorsA = buildDistanceVectors(aGraph);
-		Map<PetrinetNode, Map<PetrinetNode, Integer>> distanceVectorsB = buildDistanceVectors(bGraph);
+		Map<PetrinetNode, Map<PetrinetNode, Integer>> distanceVectorsA = buildDistanceVectors(transitionsModelA);
+		Map<PetrinetNode, Map<PetrinetNode, Integer>> distanceVectorsB = buildDistanceVectors(transitionsModelB);
 
-		Map<PetrinetNode, Map<PetrinetNode, Double>> transitionVectorsA = buildTransitionVectors(aGraph,
+		Map<PetrinetNode, Map<PetrinetNode, Double>> transitionVectorsA = buildTransitionVectors(modelA,
 				activityVectorA, distanceVectorsA);
-		Map<PetrinetNode, Map<PetrinetNode, Double>> transitionVectorsB = buildTransitionVectors(bGraph,
+		Map<PetrinetNode, Map<PetrinetNode, Double>> transitionVectorsB = buildTransitionVectors(modelB,
 				activityVectorB, distanceVectorsB);
 
 		// calculate similarity of activity and transition vectors
@@ -89,18 +89,18 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 
 		// establish the set of all activities occurring in models a and b
 		Set<String> vertexIdentifiers = new HashSet<String>();
-		for (PetrinetNode vertex : getLabeledElements(aGraph, true, true)) {
+		for (PetrinetNode vertex : transitionsModelA) {
 			vertexIdentifiers.add(vertex.getLabel());
 		}
-		for (PetrinetNode vertex : getLabeledElements(bGraph, true, true)) {
+		for (PetrinetNode vertex : transitionsModelB) {
 			vertexIdentifiers.add(vertex.getLabel());
 		}
 
 		// now calculate the necessary variables for the similarities
 		for (String vertexIdentifier : vertexIdentifiers) {
 
-			PetrinetNode vertexA = getNode(aGraph, vertexIdentifier);
-			PetrinetNode vertexB = getNode(bGraph, vertexIdentifier);
+			PetrinetNode vertexA = getNode(modelA, vertexIdentifier);
+			PetrinetNode vertexB = getNode(modelB, vertexIdentifier);
 
 			double executionProbabilityA = null == vertexA ? 0 : activityVectorA.get(vertexA);
 			double executionProbabilityB = null == vertexB ? 0 : activityVectorB.get(vertexB);
@@ -110,8 +110,8 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 			sumSquaredExecutionProbabilitiesB += executionProbabilityB * executionProbabilityB;
 
 			for (String vertexIdentifer2 : vertexIdentifiers) {
-				PetrinetNode vertexA2 = getNode(aGraph, vertexIdentifer2);
-				PetrinetNode vertexB2 = getNode(bGraph, vertexIdentifer2);
+				PetrinetNode vertexA2 = getNode(modelA, vertexIdentifer2);
+				PetrinetNode vertexB2 = getNode(modelB, vertexIdentifer2);
 
 				double transitionProbabilityA = null == vertexA || null == vertexA2 ? 0
 						: transitionVectorsA.get(vertexA).get(vertexA2);
@@ -142,29 +142,30 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 	 * 
 	 * @return the activity vector for the given model graph
 	 */
-	private Map<PetrinetNode, Double> buildActivityVector(PetrinetGraph graph) {
-		// we use a graph without cycles, since branch water cannot handle
-		// cycles and the results are the same for both types
-//		PetrinetGraph graphWithoutCycles = ModelGraphCycleRemover.removeCycles(graph, getFirstNodeFromGraph(graph));
+	private Map<PetrinetNode, Double> buildActivityVector(Set<PetrinetNode> transitionsModel) {
 		Map<PetrinetNode, Double> activityVector = new HashMap<PetrinetNode, Double>();
-//
-//		// TODO rever
-//		Map<PetrinetNode, Double> activityVectorGraphWithoutCycles = branchWater(graphWithoutCycles,
-//				getFirstNodeFromGraph(graphWithoutCycles));
-//
-//		// we need to establish activity vectors that contain the vertices from
-//		// the working models not the ones from the model with removed cycles
-//		Map<PetrinetNode, PetrinetNode> mappings = getMapping(graphWithoutCycles, graph);
-//
-//		for (PetrinetNode vertex : activityVectorGraphWithoutCycles.keySet()) {
-//			if (vertex instanceof Transition && !isInvisibleTransition(vertex))
-//				activityVector.put(mappings.get(vertex), activityVectorGraphWithoutCycles.get(vertex));
-//		}
-		
-		for(PetrinetNode node : graph.getTransitions()){
-			if (node instanceof Transition && !isInvisibleTransition(node)){
-				activityVector.put(node, 1.0);
+
+		for (PetrinetNode node : transitionsModel) {
+			Transition transition = (Transition) node;
+
+			Collection<Transition> predecessors = transition.getVisiblePredecessors();
+
+			double prob = 0;
+
+			if (predecessors.size() == 0) { // start
+				prob = 1;
+			} else if (transition.getVisibleSuccessors().size() == 0) { //stop
+				prob = 1;
+			} else if (predecessors.size() > 0) {
+				
+				for (Transition pred : predecessors) {
+					double localProb = 1.0 / pred.getVisibleSuccessors().size();
+					if (localProb > prob)
+						prob = localProb;
+				}
 			}
+
+			activityVector.put(node, prob);
 		}
 
 		return activityVector;
@@ -184,21 +185,20 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 		distanceValue++;
 		Collection<PetrinetNode> toVisit = new HashSet<PetrinetNode>();
 
+		Transition transitionStart = (Transition) start;
+
 		// first collect the distance for all direct successors and add them to
 		// the distance vector
-		for (Object successorObject : getTransitiveClosureSuccessors(start)) {
-			PetrinetNode successor = (PetrinetNode) successorObject;
+		for (Transition successorTransition : transitionStart.getVisibleSuccessors()) {
 
-			if (distance.containsKey(successor)) {
+			if (distance.containsKey(successorTransition)) {
 				continue;
 			} else {
-				distance.put(successor, distanceValue);
-				toVisit.add(successor);
+				distance.put(successorTransition, distanceValue);
+				toVisit.add(successorTransition);
 			}
 		}
 
-		// no visit the vertices that were not already visited (to handle
-		// cycles)
 		for (PetrinetNode vertex : toVisit) {
 			buildDistanceVector(vertex, distance, distanceValue);
 		}
@@ -213,10 +213,10 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 	 *            the graph
 	 * @return the map containing the distances
 	 */
-	private Map<PetrinetNode, Map<PetrinetNode, Integer>> buildDistanceVectors(PetrinetGraph graph) {
+	private Map<PetrinetNode, Map<PetrinetNode, Integer>> buildDistanceVectors(Set<PetrinetNode> transitionsModel) {
 		Map<PetrinetNode, Map<PetrinetNode, Integer>> distances = new HashMap<PetrinetNode, Map<PetrinetNode, Integer>>();
 
-		for (PetrinetNode vertex : graph.getNodes()) {
+		for (PetrinetNode vertex : transitionsModel) {
 			Map<PetrinetNode, Integer> distance = new HashMap<PetrinetNode, Integer>();
 			distances.put(vertex, distance);
 

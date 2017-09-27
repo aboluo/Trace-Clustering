@@ -51,13 +51,18 @@ public class ExperimentLoaderTest {
 		//filePathBase = "C:\\Users\\alexme\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
 		
 		filePathBase = "D:\\Dropbox\\Dropbox\\Mestrado em Informática - PUCPR\\Process Mining\\2017 - Process Mining - Dissertação";
-		loader = new ExperimentLoader(filePathBase, true, true);		
+		loader = new ExperimentLoader(filePathBase, true, false);		
 		datesetPathBase = filePathBase + "\\Experiment\\Dataset";
 		
 		currentFile = new File(datesetPathBase + "\\01Hospital_log.xes");
 		currentLog = LogUtils.loadByFile(currentFile);
 	}
 
+	@Test
+	public void LoadAll() {
+		loader.LoadAll();
+	}
+	
 	@Test
 	public void CommonActivityNameSimilarity() {
 		loader.load(currentFile, currentLog, new CommonActivityNameSimilarity());
