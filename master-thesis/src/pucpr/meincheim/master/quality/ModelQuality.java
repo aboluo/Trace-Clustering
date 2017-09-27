@@ -8,6 +8,7 @@ public class ModelQuality {
 	private double recall;
 	private double Simplicit;
 	private double generalization;
+	private double fScore;
 
 	public String getModelName() {
 		return modelName;
@@ -49,4 +50,11 @@ public class ModelQuality {
 		this.generalization = generalization;
 	}
 
+	public double getfScore() {
+		return fScore;
+	}
+
+	public void setfScore(double fScore) {
+		this.fScore = fScore;
+	}
 }

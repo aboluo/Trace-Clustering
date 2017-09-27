@@ -18,18 +18,34 @@ public class ResultCompiler {
 
 		// Complete
 		compileFile(resultsDirectory, "", "Precision");
-//		compileFile(resultsDirectory, "", "Precision");
-//		compileFile(resultsDirectory, "", "Precision");
-
+		compileFile(resultsDirectory, "", "Recall");
+		compileFile(resultsDirectory, "", "FScore");
+		
 		// By Thresholds
 		compileFile(resultsDirectory, "0.4", "Precision");
 		compileFile(resultsDirectory, "0.6", "Precision");
 		compileFile(resultsDirectory, "0.8", "Precision");
+		
+		compileFile(resultsDirectory, "0.4", "Recall");
+		compileFile(resultsDirectory, "0.6", "Recall");
+		compileFile(resultsDirectory, "0.8", "Recall");
+		
+		compileFile(resultsDirectory, "0.4", "FScore");
+		compileFile(resultsDirectory, "0.6", "FScore");
+		compileFile(resultsDirectory, "0.8", "FScore");
 
 		// By database
 		compileFile(resultsDirectory, "HospitalLog", "Precision");
+		compileFile(resultsDirectory, "HospitalLog", "Recall");
+		compileFile(resultsDirectory, "HospitalLog", "FScore");
+		
 		compileFile(resultsDirectory, "RoadTraffic", "Precision");
+		compileFile(resultsDirectory, "RoadTraffic", "Recall");
+		compileFile(resultsDirectory, "RoadTraffic", "FScore");
+		
 		compileFile(resultsDirectory, "Financial", "Precision");
+		compileFile(resultsDirectory, "Financial", "Recall");
+		compileFile(resultsDirectory, "Financial", "FScore");
 
 	}
 

@@ -64,11 +64,6 @@ public class ExperimentLoaderTest {
 	}
 
 	@Test
-	public void CommonNodesEdgesSimilarity() {
-		loader.load(currentFile, currentLog, new CommonNodesEdgesSimilarity());
-	}
-
-	@Test
 	public void FeatureBasedSimilarity() {
 		loader.load(currentFile, currentLog, new FeatureBasedSimilarity());
 	}

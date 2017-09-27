@@ -58,7 +58,6 @@ public class ExperimentLoader {
 
 		// Label
 		this.similaritiesMeasures.add(new CommonActivityNameSimilarity());
-		this.similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
 		this.similaritiesMeasures.add(new FeatureBasedSimilarity());
 		// Behavioral
 		this.similaritiesMeasures.add(new TARSimilarity());

@@ -19,21 +19,21 @@ public class FinalQualityEvaluator extends QualityEvaluator {
 		this.ppcProcessTreeQualityEvaluator = new PPCProcessTreeQualityEvaluator(context, miner);
 		this.ayraQualityEvaluator = new AyraQualityEvaluator(context, miner);
 	}
-	
+
 	@Override
 	public void loadMapping(XLog log) {
 		this.log = log;
 		ppcProcessTreeQualityEvaluator.loadMapping(log);
 		ayraQualityEvaluator.loadMapping(log);
 	}
-	
-	public double calculateSimplicity(){
+
+	public double calculateSimplicity() {
 		WeighedPlaceTransitionArcDegree metric = new WeighedPlaceTransitionArcDegree();
 		metric.load(ayraQualityEvaluator.getMapping());
 		metric.calculate();
 		return metric.getResult();
 	}
-	
+
 	public ModelQuality calculate() {
 		ModelQuality q = new ModelQuality();
 		q.setModelName("" + log.size());
@@ -41,13 +41,16 @@ public class FinalQualityEvaluator extends QualityEvaluator {
 			q.setRecall(ayraQualityEvaluator.calculateRecall());
 			q.setPrecision(ppcProcessTreeQualityEvaluator.pccCalculate().getPrecision());
 			q.setSimplicit(calculateSimplicity());
+			q.setfScore(2 * ((q.getPrecision() * q.getRecall()) / (q.getPrecision() + q.getRecall())));
+
 		} catch (InterruptedException | AutomatonFailedException | AStarException | ProjectedMeasuresFailedException e) {
 			System.out.println("Error on calculate metrics " + e.getMessage());
 			e.printStackTrace();
 		}
+
 		System.out.println("Recall: " + q.getRecall());
 		System.out.println("Precision: " + q.getPrecision());
-		System.out.println("Simplicity: " + q.getSimplicit());
+
 		return q;
 	}
 }

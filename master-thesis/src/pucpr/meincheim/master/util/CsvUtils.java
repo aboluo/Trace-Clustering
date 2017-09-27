@@ -22,6 +22,10 @@ public class CsvUtils {
 
 		List<Double> recall = clusterQualities.stream().map(ModelQuality::getRecall).collect(Collectors.toList());
 		exportFile(recall, filename + " Recall");
+
+		List<Double> fScore = clusterQualities.stream().map(ModelQuality::getfScore).collect(Collectors.toList());
+		exportFile(fScore, filename + " FScore");
+
 	}
 
 	public void exportFile(List<Double> values, String filename) {
