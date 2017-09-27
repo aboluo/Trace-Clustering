@@ -150,13 +150,20 @@ public class DependencyGraphComparisonSimilarity extends AbstractModelGraphSimil
 
 			Collection<Transition> predecessors = transition.getVisiblePredecessors();
 
-			double prob = predecessors.size() == 0 ? 1 : 0;
+			double prob = 0;
 
-			for (Transition pred : predecessors)
-				prob += 1.0 / pred.getVisibleSuccessors().size();
-
-			if (prob > 1)
+			if (predecessors.size() == 0) { // start
 				prob = 1;
+			} else if (transition.getVisibleSuccessors().size() == 0) { //stop
+				prob = 1;
+			} else if (predecessors.size() > 0) {
+				
+				for (Transition pred : predecessors) {
+					double localProb = 1.0 / pred.getVisibleSuccessors().size();
+					if (localProb > prob)
+						prob = localProb;
+				}
+			}
 
 			activityVector.put(node, prob);
 		}

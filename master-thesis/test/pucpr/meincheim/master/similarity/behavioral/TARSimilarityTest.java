@@ -14,12 +14,13 @@ public class TARSimilarityTest extends BaseTest {
 	public void calculateTest() {
 		double result = sim.calculateSimilarity(model0, model0);
 		Assert.assertEquals(1, result, 0);
-						
+
+		result = sim.calculateSimilarity(model0, model1);
+
+		result = sim.calculateSimilarity(model0, model2);
+	
 		result = sim.calculateSimilarity(complexModel, complexModel);
 		Assert.assertEquals(1, result, 0);
-			
-		result = sim.calculateSimilarity(model0, model1);
-		System.out.println(result);
 	}
 
 }

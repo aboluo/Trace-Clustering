@@ -58,7 +58,6 @@ public class ExperimentLoader {
 
 		// Label
 		this.similaritiesMeasures.add(new CommonActivityNameSimilarity());
-		this.similaritiesMeasures.add(new CommonNodesEdgesSimilarity());
 		this.similaritiesMeasures.add(new FeatureBasedSimilarity());
 		// Behavioral
 		this.similaritiesMeasures.add(new TARSimilarity());
@@ -69,7 +68,7 @@ public class ExperimentLoader {
 
 		this.experimentPathBase = filePathBase + "\\Experiment\\Results";
 		this.datesetPathBase = filePathBase + "\\Experiment\\Dataset";
-		
+
 		this.cluster = cluster;
 		this.evaluate = evaluate;
 	}
