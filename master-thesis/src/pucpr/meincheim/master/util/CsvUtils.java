@@ -26,6 +26,8 @@ public class CsvUtils {
 		List<Double> fScore = clusterQualities.stream().map(ModelQuality::getfScore).collect(Collectors.toList());
 		exportFile(fScore, filename + " FScore");
 
+		List<Double> simplicity = clusterQualities.stream().map(ModelQuality::getSimplicit).collect(Collectors.toList());
+		exportFile(simplicity, filename + " Simplicity");
 	}
 
 	public void exportFile(List<Double> values, String filename) {

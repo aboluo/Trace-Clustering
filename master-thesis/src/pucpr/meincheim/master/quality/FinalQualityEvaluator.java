@@ -48,9 +48,8 @@ public class FinalQualityEvaluator extends QualityEvaluator {
 			e.printStackTrace();
 		}
 
-		System.out.println("Recall: " + q.getRecall());
-		System.out.println("Precision: " + q.getPrecision());
-
+//		System.out.println("Recall: " + q.getRecall());
+//		System.out.println("Precision: " + q.getPrecision());
 		return q;
 	}
 }
